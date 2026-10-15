@@ -1,0 +1,2062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SERVO Enterprise Sales Intelligence & Pivot Comparison Analytics</title>
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <!-- Inter Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  
+  <!-- SheetJS (xlsx) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root {
+      --servo-navy: #002b49;
+      --servo-navy-dark: #001c30;
+      --servo-navy-light: #0d4470;
+      --servo-orange: #ff6600;
+      --servo-orange-hover: #e55c00;
+      --servo-accent-blue: #0284c7;
+      --servo-bg: #f3f5f9;
+      --servo-card-bg: #ffffff;
+      --servo-border: #e2e8f0;
+      --servo-text: #1e293b;
+      --servo-text-muted: #64748b;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--servo-bg);
+      color: var(--servo-text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Top Brand Navigation */
+    .top-navbar {
+      background: linear-gradient(135deg, var(--servo-navy-dark) 0%, var(--servo-navy) 65%, #083b63 100%);
+      border-bottom: 3px solid var(--servo-orange);
+      box-shadow: 0 4px 20px rgba(0, 28, 48, 0.25);
+    }
+
+    .brand-logo-pill {
+      background: var(--servo-orange);
+      color: #fff;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      padding: 4px 12px;
+      border-radius: 6px;
+      display: inline-block;
+      box-shadow: 0 2px 8px rgba(255, 102, 0, 0.4);
+    }
+
+    /* Tab Switcher Pills */
+    .nav-tabs-custom {
+      border-bottom: none;
+      gap: 8px;
+    }
+
+    .nav-tabs-custom .nav-link {
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.08);
+      color: #e2e8f0;
+      font-weight: 600;
+      font-size: 0.9rem;
+      border-radius: 8px !important;
+      padding: 9px 18px;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .nav-tabs-custom .nav-link:hover {
+      background: rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .nav-tabs-custom .nav-link.active {
+      background: #ffffff !important;
+      color: var(--servo-navy) !important;
+      border-color: #ffffff !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .nav-tabs-custom .nav-link.active .tab-icon {
+      color: var(--servo-orange);
+    }
+
+    /* Cards */
+    .dashboard-card {
+      background: var(--servo-card-bg);
+      border: 1px solid var(--servo-border);
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+      transition: box-shadow 0.2s ease;
+    }
+
+    .dashboard-card:hover {
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.07);
+    }
+
+    /* KPI Cards */
+    .kpi-card {
+      border-radius: 12px;
+      border: 1px solid var(--servo-border);
+      background: #ffffff;
+      padding: 1.1rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--servo-navy);
+    }
+
+    .kpi-card.kpi-orange::before { background: var(--servo-orange); }
+    .kpi-card.kpi-blue::before { background: #0284c7; }
+    .kpi-card.kpi-green::before { background: #10b981; }
+    .kpi-card.kpi-purple::before { background: #8b5cf6; }
+
+    .kpi-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--servo-text-muted);
+    }
+
+    .kpi-value {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: var(--servo-navy);
+      line-height: 1.2;
+      margin-top: 4px;
+      margin-bottom: 2px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .kpi-card.kpi-orange .kpi-value { color: var(--servo-orange); }
+    .kpi-card.kpi-blue .kpi-value { color: #0284c7; }
+    .kpi-card.kpi-green .kpi-value { color: #059669; }
+
+    /* Filter Bar */
+    .filter-panel {
+      background: #ffffff;
+      border: 1px solid var(--servo-border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label-xs {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: #475569;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .form-select-sm, .form-control-sm {
+      border-radius: 6px;
+      font-size: 0.82rem;
+      border-color: #cbd5e1;
+    }
+
+    .form-select-sm:focus, .form-control-sm:focus {
+      border-color: var(--servo-orange);
+      box-shadow: 0 0 0 0.2rem rgba(255, 102, 0, 0.15);
+    }
+
+    /* Pivot Matrix Table */
+    .pivot-container {
+      max-height: 520px;
+      overflow: auto;
+      border: 1px solid var(--servo-border);
+      border-radius: 8px;
+    }
+
+    .pivot-table {
+      font-size: 0.82rem;
+      margin-bottom: 0;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .pivot-table th {
+      position: sticky;
+      top: 0;
+      background: #0f2742;
+      color: #ffffff;
+      font-weight: 700;
+      z-index: 2;
+      padding: 8px 12px;
+      white-space: nowrap;
+      border-bottom: 2px solid var(--servo-orange);
+    }
+
+    .pivot-table th.pivot-row-header-col {
+      position: sticky;
+      left: 0;
+      z-index: 3;
+      background: #091a2e;
+    }
+
+    .pivot-table td.pivot-row-label {
+      position: sticky;
+      left: 0;
+      background: #f8fafc;
+      font-weight: 600;
+      color: #1e293b;
+      z-index: 1;
+      border-right: 2px solid #cbd5e1;
+      white-space: nowrap;
+      padding: 7px 12px;
+    }
+
+    .pivot-table td {
+      padding: 7px 12px;
+      text-align: right;
+      border-bottom: 1px solid #e2e8f0;
+      border-right: 1px solid #f1f5f9;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+    }
+
+    .pivot-table tr:hover td {
+      background-color: #f1f5f9;
+    }
+
+    .pivot-table tr.total-row td {
+      background: #e2e8f0 !important;
+      font-weight: 800;
+      color: var(--servo-navy);
+      border-top: 2px solid var(--servo-navy);
+      position: sticky;
+      bottom: 0;
+      z-index: 2;
+    }
+
+    .pivot-table td.total-col {
+      background: #f1f5f9;
+      font-weight: 800;
+      color: var(--servo-navy);
+      border-left: 2px solid #cbd5e1;
+    }
+
+    /* Heatmap subtle shading */
+    .heat-high { background-color: rgba(255, 102, 0, 0.18) !important; font-weight: 700; }
+    .heat-med { background-color: rgba(255, 102, 0, 0.08) !important; }
+
+    /* Upload Drop Zone */
+    .dropzone-box {
+      border: 2px dashed #cbd5e1;
+      background-color: #f8fafc;
+      border-radius: 12px;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .dropzone-box:hover, .dropzone-box.dragover {
+      border-color: var(--servo-orange);
+      background-color: rgba(255, 102, 0, 0.03);
+    }
+
+    /* Badge indicators */
+    .badge-servo {
+      background-color: var(--servo-navy);
+      color: #fff;
+    }
+    .badge-servo-orange {
+      background-color: var(--servo-orange);
+      color: #fff;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    .btn-servo {
+      background-color: var(--servo-orange);
+      color: #ffffff;
+      font-weight: 600;
+      border: none;
+    }
+    .btn-servo:hover {
+      background-color: var(--servo-orange-hover);
+      color: #ffffff;
+    }
+
+    .btn-servo-navy {
+      background-color: var(--servo-navy);
+      color: #ffffff;
+      font-weight: 600;
+      border: none;
+    }
+    .btn-servo-navy:hover {
+      background-color: var(--servo-navy-light);
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================= TOP HEADER NAVIGATION ================= -->
+  <header class="top-navbar text-white py-2 px-3 sticky-top">
+    <div class="container-fluid d-flex flex-wrap align-items-center justify-content-between gap-2">
+      <!-- Brand & Title -->
+      <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center gap-2">
+          <span class="brand-logo-pill">SERVO</span>
+          <div>
+            <h1 class="h6 mb-0 fw-bold tracking-wide text-white">LUBRICANTS ENTERPRISE ANALYTICS & PIVOT ENGINE</h1>
+            <span class="badge badge-servo-orange" style="font-size:0.65rem;">Durgapur Division & Regional Portal</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center: Main Interface Tabs -->
+      <ul class="nav nav-tabs nav-tabs-custom" id="mainTabList" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="tab-primary-btn" data-bs-toggle="tab" data-bs-target="#tab-primary-pane" type="button" role="tab">
+            <i class="fa-solid fa-industry me-1 tab-icon"></i> Primary Analytics & Pivot
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-secondary-btn" data-bs-toggle="tab" data-bs-target="#tab-secondary-pane" type="button" role="tab">
+            <i class="fa-solid fa-store me-1 tab-icon"></i> Secondary Analytics & Pivot
+          </button>
+        </li>
+      </ul>
+
+      <!-- Right Tools / Upload Button -->
+      <div class="d-flex align-items-center gap-2">
+        <span id="dataStatusBadge" class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 0.72rem;">
+          <i class="fa-solid fa-circle-check me-1"></i> Preloaded Sample Data Loaded
+        </span>
+        <button class="btn btn-sm btn-servo shadow-sm d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#uploadModal">
+          <i class="fa-solid fa-file-excel"></i> Upload Reports
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= MAIN WORKSPACE ================= -->
+  <main class="container-fluid px-3 py-3">
+    <div class="tab-content" id="mainTabContent">
+
+      <!-- ========================================================================= -->
+      <!-- TAB 1: PRIMARY ANALYTICS & DYNAMIC PIVOT INTERFACE                        -->
+      <!-- ========================================================================= -->
+      <div class="tab-pane fade show active" id="tab-primary-pane" role="tabpanel">
+        
+        <!-- Primary KPI Strip -->
+        <div class="row g-2 mb-3">
+          <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi-card kpi-orange">
+              <div class="kpi-title">Primary Volume</div>
+              <div class="kpi-value" id="kpiPriVolume">2,417.70</div>
+              <small class="text-muted fw-bold">KL (Kilolitres)</small>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi-card kpi-blue">
+              <div class="kpi-title">Invoiced Packs</div>
+              <div class="kpi-value" id="kpiPriPacks">184,210</div>
+              <small class="text-muted fw-bold">Packs / Billed Qty</small>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi-card kpi-green">
+              <div class="kpi-title">Active Stockists</div>
+              <div class="kpi-value" id="kpiPriStockists">6</div>
+              <small class="text-muted fw-bold">Operating Distributors</small>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi-card kpi-purple">
+              <div class="kpi-title">Premium Ratio</div>
+              <div class="kpi-value" id="kpiPriPremRatio">38.4%</div>
+              <small class="text-muted fw-bold">Premium Volume %</small>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi-card">
+              <div class="kpi-title">Top Segment</div>
+              <div class="kpi-value" style="font-size: 1.25rem;" id="kpiPriTopSegment">DEO / 4T</div>
+              <small class="text-muted fw-bold">Leading contributor</small>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi-card kpi-blue">
+              <div class="kpi-title">Recorded Rows</div>
+              <div class="kpi-value" id="kpiPriRows">850</div>
+              <small class="text-muted fw-bold">Filtered Invoices</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Primary Filter Controls -->
+        <div class="filter-panel shadow-sm">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="fw-bold text-dark d-flex align-items-center gap-2" style="font-size: 0.88rem;">
+              <i class="fa-solid fa-filter text-primary"></i> Multi-Dimensional Primary Filter Bar
+            </div>
+            <button class="btn btn-outline-secondary btn-sm py-0 px-2" style="font-size: 0.75rem;" onclick="resetPrimaryFilters()">
+              <i class="fa-solid fa-rotate-left me-1"></i> Reset Filters
+            </button>
+          </div>
+          <div class="row g-2">
+            <div class="col-12 col-sm-6 col-md-3 col-xl-2">
+              <label class="form-label-xs">Financial Year (FY)</label>
+              <select id="pFilterFY" class="form-select form-select-sm" onchange="applyPrimaryFilters()">
+                <option value="ALL">All Financial Years</option>
+                <option value="FY 22-23">FY 22-23</option>
+                <option value="FY 23-24">FY 23-24</option>
+                <option value="FY 24-25">FY 24-25</option>
+                <option value="FY 25-26" selected>FY 25-26</option>
+                <option value="FY 26-27">FY 26-27</option>
+              </select>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 col-xl-2">
+              <label class="form-label-xs">Month (Billing Month)</label>
+              <select id="pFilterMonth" class="form-select form-select-sm" onchange="applyPrimaryFilters()">
+                <option value="ALL">All Months</option>
+                <option value="APR">April</option>
+                <option value="MAY">May</option>
+                <option value="JUN">June</option>
+                <option value="JUL">July</option>
+                <option value="AUG">August</option>
+                <option value="SEP">September</option>
+                <option value="OCT">October</option>
+                <option value="NOV">November</option>
+                <option value="DEC">December</option>
+                <option value="JAN">January</option>
+                <option value="FEB">February</option>
+                <option value="MAR">March</option>
+              </select>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 col-xl-2">
+              <label class="form-label-xs">Stockist / SSR Name</label>
+              <select id="pFilterStockist" class="form-select form-select-sm" onchange="applyPrimaryFilters()">
+                <option value="ALL">All Stockists</option>
+              </select>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 col-xl-2">
+              <label class="form-label-xs">Segmentation / Segment</label>
+              <select id="pFilterSegment" class="form-select form-select-sm" onchange="applyPrimaryFilters()">
+                <option value="ALL">All Segments</option>
+              </select>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 col-xl-2">
+              <label class="form-label-xs">Premium Classification</label>
+              <select id="pFilterPremium" class="form-select form-select-sm" onchange="applyPrimaryFilters()">
+                <option value="ALL">All Categories</option>
+              </select>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 col-xl-2">
+              <label class="form-label-xs">Pack Size</label>
+              <select id="pFilterPackSize" class="form-select form-select-sm" onchange="applyPrimaryFilters()">
+                <option value="ALL">All Pack Sizes</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= DYNAMIC PIVOT BUILDER (PRIMARY) ================= -->
+        <div class="dashboard-card p-3 mb-3">
+          <div class="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-2 mb-3 gap-2">
+            <div>
+              <h5 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+                <i class="fa-solid fa-table-cells text-warning"></i> Primary Dynamic Cross-Tab & Pivot Matrix
+              </h5>
+              <small class="text-muted">Create any cross-combination (e.g., Month vs Premium, Segment vs Stockist, PackSize vs Month)</small>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-outline-primary btn-sm" onclick="exportPivotToCSV('primaryPivotTable', 'Primary_Pivot_Analysis.csv')">
+                <i class="fa-solid fa-file-csv me-1"></i> Export Matrix CSV
+              </button>
+            </div>
+          </div>
+
+          <!-- Pivot Dimension Selectors -->
+          <div class="row g-2 align-items-end mb-3 bg-light p-2 rounded-3 border">
+            <div class="col-12 col-md-3">
+              <label class="form-label-xs text-primary"><i class="fa-solid fa-arrows-up-down me-1"></i> ROW Dimension</label>
+              <select id="pivotRowDim" class="form-select form-select-sm fw-semibold" onchange="renderPrimaryPivot()">
+                <option value="Month" selected>Month</option>
+                <option value="Stockist">Stockist / SSR Name</option>
+                <option value="Segment">Segmentation / Product Type</option>
+                <option value="Premium">Premium Category</option>
+                <option value="PackSize">Pack Size</option>
+                <option value="Assorted">4T / Assorted</option>
+                <option value="FY">Financial Year</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label-xs text-success"><i class="fa-solid fa-arrows-left-right me-1"></i> COLUMN Dimension</label>
+              <select id="pivotColDim" class="form-select form-select-sm fw-semibold" onchange="renderPrimaryPivot()">
+                <option value="Premium" selected>Premium Category</option>
+                <option value="Segment">Segmentation / Segment</option>
+                <option value="Month">Month</option>
+                <option value="Stockist">Stockist</option>
+                <option value="FY">Financial Year</option>
+                <option value="Assorted">4T / Assorted</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label-xs text-danger"><i class="fa-solid fa-calculator me-1"></i> AGGREGATION METRIC</label>
+              <select id="pivotMetric" class="form-select form-select-sm fw-semibold" onchange="renderPrimaryPivot()">
+                <option value="volumeKL" selected>Sum of Volume (KL)</option>
+                <option value="qty">Sum of Billing Qty / Packs</option>
+                <option value="count">Count of Invoices / Records</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-3">
+              <button class="btn btn-servo w-100 btn-sm" onclick="renderPrimaryPivot()">
+                <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Recalculate Pivot
+              </button>
+            </div>
+          </div>
+
+          <!-- Pivot Matrix Output Container -->
+          <div class="pivot-container" id="primaryPivotContainer">
+            <table class="table table-bordered table-sm pivot-table" id="primaryPivotTable">
+              <!-- Dynamically built via JS -->
+            </table>
+          </div>
+        </div>
+
+        <!-- Primary Charts Row -->
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-lg-7">
+            <div class="dashboard-card p-3 h-100">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-chart-column text-primary me-2"></i>Month vs Premium Trajectory (KL)</h6>
+                <div class="btn-group btn-group-sm">
+                  <button class="btn btn-outline-secondary active py-0" id="btnChartStacked" onclick="togglePrimaryChartType('bar')">Bar</button>
+                  <button class="btn btn-outline-secondary py-0" id="btnChartLine" onclick="togglePrimaryChartType('line')">Line</button>
+                </div>
+              </div>
+              <div style="height: 280px; position: relative;">
+                <canvas id="primaryTrendChart"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-lg-5">
+            <div class="dashboard-card p-3 h-100">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-chart-pie text-warning me-2"></i>Segmentation Share</h6>
+                <span class="badge bg-light text-secondary border">Volume %</span>
+              </div>
+              <div style="height: 280px; position: relative;">
+                <canvas id="primarySegmentChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Primary Stockist & Pack Size Chart Breakdown -->
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-lg-6">
+            <div class="dashboard-card p-3">
+              <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-ranking-star text-info me-2"></i>Stockist Primary Volume Contribution (KL)</h6>
+              <div style="height: 240px; position: relative;">
+                <canvas id="primaryStockistChart"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-lg-6">
+            <div class="dashboard-card p-3">
+              <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-boxes-stacked text-success me-2"></i>Pack Size Mix (KL)</h6>
+              <div style="height: 240px; position: relative;">
+                <canvas id="primaryPackSizeChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- TAB 2: SECONDARY ANALYTICS & DYNAMIC PIVOT INTERFACE                      -->
+      <!-- ========================================================================= -->
+      <div class="tab-pane fade" id="tab-secondary-pane" role="tabpanel">
+        
+        <!-- Secondary KPI Strip -->
+        <div class="row g-2 mb-3">
+          <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi-card kpi-orange">
+              <div class="kpi-title">Secondary Volume</div>
+              <div class="kpi-value" id="kpiSecVolume">2,453.49</div>
+              <small class="text-muted fw-bold">KL Delivered to Market</small>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi-card kpi-green">
+              <div class="kpi-title">Billed Value (Cr)</div>
+              <div class="kpi-value" id="kpiSecValue">₹44.93</div>
+              <small class="text-muted fw-bold">Crores Net Revenue</small>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi-card kpi-blue">
+              <div class="kpi-title">Realization (₹/L)</div>
+              <div class="kpi-value" id="kpiSecRealization">₹183.1</div>
+              <small class="text-muted fw-bold">Avg Revenue / Liter</small>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi-card kpi-purple">
+              <div class="kpi-title">Active Outlets</div>
+              <div class="kpi-value" id="kpiSecCounters">482</div>
+              <small class="text-muted fw-bold">Dealers / Garages</small>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi-card">
+              <div class="kpi-title">Top Channel</div>
+              <div class="kpi-value" style="font-size: 1.25rem;" id="kpiSecTopChannel">DEALER / BAZAAR</div>
+              <small class="text-muted fw-bold">Leading secondary stream</small>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi-card kpi-orange">
+              <div class="kpi-title">Active SSFs / FSOs</div>
+              <div class="kpi-value" id="kpiSecSSFs">14</div>
+              <small class="text-muted fw-bold">Field Officers</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Secondary Filter Controls -->
+        <div class="filter-panel shadow-sm">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="fw-bold text-dark d-flex align-items-center gap-2" style="font-size: 0.88rem;">
+              <i class="fa-solid fa-filter text-warning"></i> Multi-Dimensional Secondary Filter Bar
+            </div>
+            <button class="btn btn-outline-secondary btn-sm py-0 px-2" style="font-size: 0.75rem;" onclick="resetSecondaryFilters()">
+              <i class="fa-solid fa-rotate-left me-1"></i> Reset Filters
+            </button>
+          </div>
+          <div class="row g-2">
+            <div class="col-12 col-sm-6 col-md-3 col-xl-2">
+              <label class="form-label-xs">Financial Year (FY)</label>
+              <select id="sFilterFY" class="form-select form-select-sm" onchange="applySecondaryFilters()">
+                <option value="ALL">All Financial Years</option>
+                <option value="FY 24-25">FY 24-25</option>
+                <option value="FY 25-26" selected>FY 25-26</option>
+                <option value="FY 26-27">FY 26-27</option>
+              </select>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 col-xl-2">
+              <label class="form-label-xs">Month (Sales Month)</label>
+              <select id="sFilterMonth" class="form-select form-select-sm" onchange="applySecondaryFilters()">
+                <option value="ALL">All Months</option>
+                <option value="APR">April</option>
+                <option value="MAY">May</option>
+                <option value="JUN">June</option>
+                <option value="JUL">July</option>
+                <option value="AUG">August</option>
+                <option value="SEP">September</option>
+                <option value="OCT">October</option>
+                <option value="NOV">November</option>
+                <option value="DEC">December</option>
+                <option value="JAN">January</option>
+                <option value="FEB">February</option>
+                <option value="MAR">March</option>
+              </select>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 col-xl-2">
+              <label class="form-label-xs">Parent Stockist</label>
+              <select id="sFilterStockist" class="form-select form-select-sm" onchange="applySecondaryFilters()">
+                <option value="ALL">All Stockists</option>
+              </select>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 col-xl-2">
+              <label class="form-label-xs">Customer Group / Channel</label>
+              <select id="sFilterChannel" class="form-select form-select-sm" onchange="applySecondaryFilters()">
+                <option value="ALL">All Customer Groups</option>
+              </select>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 col-xl-2">
+              <label class="form-label-xs">Customer District</label>
+              <select id="sFilterDistrict" class="form-select form-select-sm" onchange="applySecondaryFilters()">
+                <option value="ALL">All Districts</option>
+              </select>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3 col-xl-2">
+              <label class="form-label-xs">SSF / Field Officer</label>
+              <select id="sFilterSSF" class="form-select form-select-sm" onchange="applySecondaryFilters()">
+                <option value="ALL">All Field Officers</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= DYNAMIC PIVOT BUILDER (SECONDARY) ================= -->
+        <div class="dashboard-card p-3 mb-3">
+          <div class="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-2 mb-3 gap-2">
+            <div>
+              <h5 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+                <i class="fa-solid fa-table-list text-warning"></i> Secondary Dynamic Cross-Tab & Revenue Matrix
+              </h5>
+              <small class="text-muted">Analyze secondary off-take by Stockist, Channel Group, District, SSF, Month & Revenue</small>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-outline-primary btn-sm" onclick="exportPivotToCSV('secondaryPivotTable', 'Secondary_Pivot_Analysis.csv')">
+                <i class="fa-solid fa-file-csv me-1"></i> Export Matrix CSV
+              </button>
+            </div>
+          </div>
+
+          <!-- Secondary Pivot Dimension Selectors -->
+          <div class="row g-2 align-items-end mb-3 bg-light p-2 rounded-3 border">
+            <div class="col-12 col-md-3">
+              <label class="form-label-xs text-primary"><i class="fa-solid fa-arrows-up-down me-1"></i> ROW Dimension</label>
+              <select id="sPivotRowDim" class="form-select form-select-sm fw-semibold" onchange="renderSecondaryPivot()">
+                <option value="Stockist" selected>Parent Stockist</option>
+                <option value="CustomerGroup">Customer Group / Channel</option>
+                <option value="District">Customer District</option>
+                <option value="SSF">Field Officer / SSF</option>
+                <option value="Month">Month</option>
+                <option value="Segment">Product Category</option>
+                <option value="FY">Financial Year</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label-xs text-success"><i class="fa-solid fa-arrows-left-right me-1"></i> COLUMN Dimension</label>
+              <select id="sPivotColDim" class="form-select form-select-sm fw-semibold" onchange="renderSecondaryPivot()">
+                <option value="CustomerGroup" selected>Customer Group / Channel</option>
+                <option value="Month">Month</option>
+                <option value="Stockist">Parent Stockist</option>
+                <option value="District">District</option>
+                <option value="FY">Financial Year</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label-xs text-danger"><i class="fa-solid fa-calculator me-1"></i> VALUE METRIC</label>
+              <select id="sPivotMetric" class="form-select form-select-sm fw-semibold" onchange="renderSecondaryPivot()">
+                <option value="volumeKL" selected>Volume (KL)</option>
+                <option value="taxableVal">Invoice / Billed Value (₹ Lakhs)</option>
+                <option value="count">Invoice / Transaction Count</option>
+                <option value="avgRealization">Avg Realization (₹ / Liter)</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-3">
+              <button class="btn btn-servo w-100 btn-sm" onclick="renderSecondaryPivot()">
+                <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Generate Secondary Matrix
+              </button>
+            </div>
+          </div>
+
+          <!-- Pivot Matrix Output Container -->
+          <div class="pivot-container" id="secondaryPivotContainer">
+            <table class="table table-bordered table-sm pivot-table" id="secondaryPivotTable">
+              <!-- Dynamically built via JS -->
+            </table>
+          </div>
+        </div>
+
+        <!-- Secondary Visualizations Row -->
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-lg-7">
+            <div class="dashboard-card p-3 h-100">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-chart-line text-success me-2"></i>Secondary Monthly Offtake & Revenue Trajectory</h6>
+                <span class="badge bg-light text-muted border">Dual Axis (KL vs ₹ Cr)</span>
+              </div>
+              <div style="height: 280px; position: relative;">
+                <canvas id="secondaryMonthlyChart"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-lg-5">
+            <div class="dashboard-card p-3 h-100">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-chart-pie text-primary me-2"></i>Customer Group / Channel Share</h6>
+                <span class="badge bg-light text-muted border">Secondary KL</span>
+              </div>
+              <div style="height: 280px; position: relative;">
+                <canvas id="secondaryChannelChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Secondary Leaderboards Row -->
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-lg-6">
+            <div class="dashboard-card p-3">
+              <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-map-location-dot text-info me-2"></i>District-wise Secondary Volume (KL)</h6>
+              <div style="height: 240px; position: relative;">
+                <canvas id="secondaryDistrictChart"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-lg-6">
+            <div class="dashboard-card p-3">
+              <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-user-tie text-warning me-2"></i>Top SSF / Field Representatives by Sales (KL)</h6>
+              <div style="height: 240px; position: relative;">
+                <canvas id="secondarySSFChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ================= UPLOAD MODAL / DRAWER ================= -->
+  <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 shadow-lg" style="border-radius: 14px; overflow: hidden;">
+        <div class="modal-header text-white" style="background: linear-gradient(135deg, var(--servo-navy-dark), var(--servo-navy)); border-bottom: 3px solid var(--servo-orange);">
+          <h5 class="modal-title fw-bold" id="uploadModalLabel">
+            <i class="fa-solid fa-cloud-arrow-up text-warning me-2"></i> Upload Primary & Secondary Excel Reports
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <p class="text-muted small mb-3">
+            Upload your official <strong>Primary Report (.xlsx)</strong> and <strong>Secondary Report (.xlsx)</strong>. The system's SheetJS engine parses all multi-year sheets (FY 22-23 to FY 26-27) automatically, normalizing column structures for instant cross-tabulation and pivot matrix generation.
+          </p>
+
+          <div class="row g-3">
+            <!-- Primary Upload Box -->
+            <div class="col-md-6">
+              <div class="dropzone-box h-100" id="primaryDropZone" onclick="document.getElementById('primaryFileInput').click()">
+                <i class="fa-solid fa-file-excel fa-3x text-primary mb-2"></i>
+                <h6 class="fw-bold mb-1">Primary Report (.xlsx)</h6>
+                <p class="text-muted small mb-2">Click to browse or drag & drop</p>
+                <span class="badge bg-light text-secondary border px-2 py-1" id="primaryFileStatus">Contains FY 22-23 to FY 26-27</span>
+                <input type="file" id="primaryFileInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handlePrimaryFileUpload(event)">
+              </div>
+            </div>
+
+            <!-- Secondary Upload Box -->
+            <div class="col-md-6">
+              <div class="dropzone-box h-100" id="secondaryDropZone" onclick="document.getElementById('secondaryFileInput').click()">
+                <i class="fa-solid fa-file-circle-check fa-3x text-warning mb-2"></i>
+                <h6 class="fw-bold mb-1">Secondary Report (.xlsx)</h6>
+                <p class="text-muted small mb-2">Click to browse or drag & drop</p>
+                <span class="badge bg-light text-secondary border px-2 py-1" id="secondaryFileStatus">Contains FY 24-25 to FY 26-27</span>
+                <input type="file" id="secondaryFileInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleSecondaryFileUpload(event)">
+              </div>
+            </div>
+          </div>
+
+          <!-- Progress Alert / Notification Area -->
+          <div id="uploadStatusMsg" class="alert alert-info py-2 px-3 mt-3 d-none align-items-center gap-2 small" role="alert">
+            <i class="fa-solid fa-spinner fa-spin"></i> <span id="uploadStatusText">Parsing file contents...</span>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-outline-secondary btn-sm" onclick="loadSampleData(true)">
+            <i class="fa-solid fa-database me-1"></i> Re-load Embedded Default Datasets
+          </button>
+          <button type="button" class="btn btn-servo-navy btn-sm" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast Container -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090;">
+    <div id="liveToast" class="toast align-items-center text-white bg-dark border-0 shadow" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body" id="toastMessage">
+          Notification message
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- ================= INLINE SCRIPT: DATA STORE, ENGINE, CHARTS & PIVOT MATRIX ================= -->
+  <script>
+    /* =========================================================
+       1. GLOBAL STATE & MASTER DATA CACHES
+       ========================================================= */
+    let primaryDataStore = [];
+    let secondaryDataStore = [];
+    
+    let filteredPrimaryData = [];
+    let filteredSecondaryData = [];
+
+    // Chart instances references
+    let primaryTrendChartInstance = null;
+    let primarySegmentChartInstance = null;
+    let primaryStockistChartInstance = null;
+    let primaryPackSizeChartInstance = null;
+
+    let secondaryMonthlyChartInstance = null;
+    let secondaryChannelChartInstance = null;
+    let secondaryDistrictChartInstance = null;
+    let secondarySSFChartInstance = null;
+
+    let crossComparisonChartInstance = null;
+    let primaryChartType = 'bar';
+
+    const MONTH_ORDER = ["APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC", "JAN", "FEB", "MAR"];
+
+    /* =========================================================
+       2. SAMPLE SEED GENERATOR (Reflecting user's primary & secondary reports)
+       ========================================================= */
+    function loadSampleData(showToastNotification = false) {
+      primaryDataStore = [];
+      secondaryDataStore = [];
+
+      const stockists = [
+        "NALATESWARI LUBRICANTS", 
+        "BIHARIJI AUTO SERVICE STATION", 
+        "Takshvi Co", 
+        "Swastik Automobiles", 
+        "SERVO WORLD", 
+        "Nilkantha Lube Service", 
+        "SMG TRADES"
+      ];
+
+      const segments = ["DEO", "4T", "ECO 4T", "AGRI", "GEAR", "HYDRASHAKTI", "GREASE", "SPECIALITY"];
+      const premiums = ["PREMIUM", "ASPIRATIONAL", "MASS"];
+      const packs = ["210 L", "50 L", "20 L", "10 L", "7.5 L", "5 L", "1 L", "900 ML", "500 ML", "18 KG", "5 KG"];
+      const channels = ["DEALER", "BAZAAR", "FLEET", "SERVOXPERT", "OEM"];
+      const districts = ["BIRBHUM", "PASCHIM BARDHAMAN", "PURBA BARDHAMAN", "BANKURA", "PURULIA"];
+      const ssfs = ["Amit Ghosh", "Subhash Mukherjee", "Ramesh Sen", "Priya Chatterjee", "S. K. Verma", "A. Mondal"];
+
+      // 1. Populate Primary Data (FY 22-23 to FY 26-27)
+      const primaryYearDist = {
+        "FY 22-23": { targetKL: 1768.75, rows: 260 },
+        "FY 23-24": { targetKL: 1883.20, rows: 280 },
+        "FY 24-25": { targetKL: 2030.12, rows: 320 },
+        "FY 25-26": { targetKL: 2417.70, rows: 380 },
+        "FY 26-27": { targetKL: 738.60, rows: 140 }
+      };
+
+      Object.keys(primaryYearDist).forEach(fy => {
+        const { targetKL, rows } = primaryYearDist[fy];
+        const avgPerItem = targetKL / rows;
+        
+        for (let i = 0; i < rows; i++) {
+          const m = MONTH_ORDER[Math.floor(Math.random() * (fy === "FY 26-27" ? 5 : 12))];
+          
+          // Stockist weight distribution
+          let stk = stockists[0];
+          const rStk = Math.random();
+          if (rStk < 0.52) stk = stockists[0];
+          else if (rStk < 0.75) stk = stockists[1];
+          else if (rStk < 0.90) stk = stockists[2];
+          else if (rStk < 0.95) stk = stockists[3];
+          else stk = stockists[4];
+
+          const seg = segments[Math.floor(Math.random() * segments.length)];
+          const prem = (seg === "4T" || seg === "ECO 4T") ? (Math.random() > 0.4 ? "PREMIUM" : "ASPIRATIONAL") : (Math.random() > 0.6 ? "PREMIUM" : "MASS");
+          const psize = packs[Math.floor(Math.random() * packs.length)];
+          const volKL = +(avgPerItem * (0.4 + Math.random() * 1.2)).toFixed(3);
+          const qty = Math.max(1, Math.round(volKL * 1000 / (parseFloat(psize) || 1)));
+
+          primaryDataStore.push({
+            FY: fy,
+            Month: m,
+            Stockist: stk,
+            Segment: seg,
+            ProductName: `SERVO ${seg} ${prem} ${psize}`,
+            Premium: prem,
+            PackSize: psize,
+            Assorted: (seg === "4T" || seg === "ECO 4T") ? "4T" : "ASSORTED",
+            quantity: qty,
+            volumeKL: volKL
+          });
+        }
+      });
+
+      // 2. Populate Secondary Data (FY 24-25 to FY 26-27)
+      const secondaryYearDist = {
+        "FY 24-25": { targetKL: 2155.12, targetVal: 3919, rows: 450 },
+        "FY 25-26": { targetKL: 2453.49, targetVal: 4493, rows: 520 },
+        "FY 26-27": { targetKL: 656.84, targetVal: 1686, rows: 180 }
+      };
+
+      Object.keys(secondaryYearDist).forEach(fy => {
+        const { targetKL, targetVal, rows } = secondaryYearDist[fy];
+        const avgPerKL = targetKL / rows;
+        const avgPerVal = targetVal / rows; // in Lakhs
+
+        for (let i = 0; i < rows; i++) {
+          const m = MONTH_ORDER[Math.floor(Math.random() * (fy === "FY 26-27" ? 5 : 12))];
+          
+          let stk = stockists[0];
+          const rStk = Math.random();
+          if (rStk < 0.50) stk = stockists[0];
+          else if (rStk < 0.74) stk = stockists[1];
+          else if (rStk < 0.89) stk = stockists[2];
+          else if (rStk < 0.95) stk = stockists[3];
+          else stk = stockists[4];
+
+          const chn = channels[Math.floor(Math.random() * channels.length)];
+          const dist = districts[Math.floor(Math.random() * districts.length)];
+          const ssf = ssfs[Math.floor(Math.random() * ssfs.length)];
+          const seg = segments[Math.floor(Math.random() * segments.length)];
+          const volKL = +(avgPerKL * (0.35 + Math.random() * 1.3)).toFixed(3);
+          const taxableLakhs = +(avgPerVal * (0.35 + Math.random() * 1.3)).toFixed(2);
+          const invoiceValLakhs = +(taxableLakhs * 1.18).toFixed(2);
+
+          secondaryDataStore.push({
+            FY: fy,
+            Month: m,
+            Stockist: stk,
+            CustomerName: `${chn} Counter #${100 + (i % 80)}`,
+            CustomerGroup: chn,
+            District: dist,
+            SSF: ssf,
+            Segment: seg,
+            ProductName: `SERVO ${seg} Commercial Grade`,
+            volumeKL: volKL,
+            taxableVal: taxableLakhs,
+            invoiceVal: invoiceValLakhs,
+            realizationLitre: (taxableLakhs * 100000) / (volKL * 1000)
+          });
+        }
+      });
+
+      populateFilterOptions();
+      applyPrimaryFilters();
+      applySecondaryFilters();
+
+      document.getElementById('dataStatusBadge').innerHTML = '<i class="fa-solid fa-circle-check me-1"></i> Preloaded Sample Data Loaded';
+      document.getElementById('dataStatusBadge').className = 'badge bg-success-subtle text-success border border-success-subtle px-2 py-1';
+
+      if (showToastNotification) {
+        showToast("Embedded dataset successfully loaded with full multi-year history.");
+      }
+    }
+
+    /* =========================================================
+       3. POPULATE DYNAMIC FILTER DROPDOWNS
+       ========================================================= */
+    function populateFilterOptions() {
+      // Primary Selects
+      populateSelect('pFilterStockist', [...new Set(primaryDataStore.map(d => d.Stockist))]);
+      populateSelect('pFilterSegment', [...new Set(primaryDataStore.map(d => d.Segment))]);
+      populateSelect('pFilterPremium', [...new Set(primaryDataStore.map(d => d.Premium))]);
+      populateSelect('pFilterPackSize', [...new Set(primaryDataStore.map(d => d.PackSize))]);
+
+      // Secondary Selects
+      populateSelect('sFilterStockist', [...new Set(secondaryDataStore.map(d => d.Stockist))]);
+      populateSelect('sFilterChannel', [...new Set(secondaryDataStore.map(d => d.CustomerGroup))]);
+      populateSelect('sFilterDistrict', [...new Set(secondaryDataStore.map(d => d.District))]);
+      populateSelect('sFilterSSF', [...new Set(secondaryDataStore.map(d => d.SSF))]);
+    }
+
+    function populateSelect(elemId, uniqueValues) {
+      const select = document.getElementById(elemId);
+      if (!select) return;
+      const currentVal = select.value;
+      const firstOpt = select.options[0].text;
+      
+      select.innerHTML = `<option value="ALL">${firstOpt}</option>`;
+      uniqueValues.filter(Boolean).sort().forEach(val => {
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = val;
+        select.appendChild(opt);
+      });
+      if (uniqueValues.includes(currentVal)) {
+        select.value = currentVal;
+      }
+    }
+
+    /* =========================================================
+       4. PRIMARY INTERFACE LOGIC & CHARTS
+       ========================================================= */
+    function applyPrimaryFilters() {
+      const fy = document.getElementById('pFilterFY').value;
+      const m = document.getElementById('pFilterMonth').value;
+      const stk = document.getElementById('pFilterStockist').value;
+      const seg = document.getElementById('pFilterSegment').value;
+      const prem = document.getElementById('pFilterPremium').value;
+      const psize = document.getElementById('pFilterPackSize').value;
+
+      filteredPrimaryData = primaryDataStore.filter(item => {
+        if (fy !== 'ALL' && item.FY !== fy) return false;
+        if (m !== 'ALL' && item.Month !== m) return false;
+        if (stk !== 'ALL' && item.Stockist !== stk) return false;
+        if (seg !== 'ALL' && item.Segment !== seg) return false;
+        if (prem !== 'ALL' && item.Premium !== prem) return false;
+        if (psize !== 'ALL' && item.PackSize !== psize) return false;
+        return true;
+      });
+
+      updatePrimaryKPIs();
+      renderPrimaryPivot();
+      renderPrimaryCharts();
+    }
+
+    function resetPrimaryFilters() {
+      document.getElementById('pFilterFY').value = 'FY 25-26';
+      document.getElementById('pFilterMonth').value = 'ALL';
+      document.getElementById('pFilterStockist').value = 'ALL';
+      document.getElementById('pFilterSegment').value = 'ALL';
+      document.getElementById('pFilterPremium').value = 'ALL';
+      document.getElementById('pFilterPackSize').value = 'ALL';
+      applyPrimaryFilters();
+      showToast("Primary filters reset to FY 25-26 baseline.");
+    }
+
+    function updatePrimaryKPIs() {
+      const totalKL = filteredPrimaryData.reduce((acc, c) => acc + (c.volumeKL || 0), 0);
+      const totalQty = filteredPrimaryData.reduce((acc, c) => acc + (c.quantity || 0), 0);
+      const uniqueStockists = new Set(filteredPrimaryData.map(d => d.Stockist)).size;
+      const premKL = filteredPrimaryData.filter(d => d.Premium === 'PREMIUM').reduce((acc, c) => acc + (c.volumeKL || 0), 0);
+      const premRatio = totalKL > 0 ? ((premKL / totalKL) * 100).toFixed(1) : '0.0';
+
+      // Find top segment
+      const segMap = {};
+      filteredPrimaryData.forEach(d => {
+        segMap[d.Segment] = (segMap[d.Segment] || 0) + (d.volumeKL || 0);
+      });
+      let topSeg = 'N/A';
+      let maxSegKL = -1;
+      Object.keys(segMap).forEach(k => {
+        if (segMap[k] > maxSegKL) {
+          maxSegKL = segMap[k];
+          topSeg = k;
+        }
+      });
+
+      document.getElementById('kpiPriVolume').innerText = totalKL.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+      document.getElementById('kpiPriPacks').innerText = totalQty.toLocaleString('en-IN');
+      document.getElementById('kpiPriStockists').innerText = uniqueStockists;
+      document.getElementById('kpiPriPremRatio').innerText = `${premRatio}%`;
+      document.getElementById('kpiPriTopSegment').innerText = topSeg;
+      document.getElementById('kpiPriRows').innerText = filteredPrimaryData.length.toLocaleString('en-IN');
+    }
+
+    /* =========================================================
+       5. PRIMARY DYNAMIC PIVOT MATRIX GENERATOR
+       ========================================================= */
+    function renderPrimaryPivot() {
+      const rowDim = document.getElementById('pivotRowDim').value;
+      const colDim = document.getElementById('pivotColDim').value;
+      const metric = document.getElementById('pivotMetric').value;
+      const container = document.getElementById('primaryPivotTable');
+
+      if (!container) return;
+
+      if (rowDim === colDim) {
+        container.innerHTML = `<tr><td class="text-danger p-3 fw-bold">ROW Dimension and COLUMN Dimension cannot be the same (${rowDim}). Please select distinct fields.</td></tr>`;
+        return;
+      }
+
+      // Collect unique Row keys & Col keys
+      const rowKeySet = new Set();
+      const colKeySet = new Set();
+
+      filteredPrimaryData.forEach(item => {
+        const rVal = item[rowDim] || "(Blank)";
+        const cVal = item[colDim] || "(Blank)";
+        rowKeySet.add(rVal);
+        colKeySet.add(cVal);
+      });
+
+      let rowKeys = Array.from(rowKeySet);
+      let colKeys = Array.from(colKeySet);
+
+      // Sort keys intelligently (e.g., month calendar order)
+      if (rowDim === 'Month') rowKeys.sort((a,b) => MONTH_ORDER.indexOf(a) - MONTH_ORDER.indexOf(b));
+      else rowKeys.sort();
+
+      if (colDim === 'Month') colKeys.sort((a,b) => MONTH_ORDER.indexOf(a) - MONTH_ORDER.indexOf(b));
+      else colKeys.sort();
+
+      // Aggregate matrix [row][col]
+      const matrix = {};
+      const colTotals = {};
+      const rowTotals = {};
+      let grandTotal = 0;
+      let maxCellVal = 0;
+
+      rowKeys.forEach(r => {
+        matrix[r] = {};
+        rowTotals[r] = 0;
+        colKeys.forEach(c => {
+          matrix[r][c] = 0;
+          if (colTotals[c] === undefined) colTotals[c] = 0;
+        });
+      });
+
+      filteredPrimaryData.forEach(item => {
+        const rVal = item[rowDim] || "(Blank)";
+        const cVal = item[colDim] || "(Blank)";
+        let val = 0;
+
+        if (metric === 'volumeKL') val = item.volumeKL || 0;
+        else if (metric === 'qty') val = item.quantity || 0;
+        else if (metric === 'count') val = 1;
+
+        matrix[rVal][cVal] += val;
+        rowTotals[rVal] += val;
+        colTotals[cVal] += val;
+        grandTotal += val;
+
+        if (matrix[rVal][cVal] > maxCellVal) {
+          maxCellVal = matrix[rVal][cVal];
+        }
+      });
+
+      // Format Header
+      let html = `<thead><tr>`;
+      html += `<th class="pivot-row-header-col">${escapeHtml(rowDim)} \\ ${escapeHtml(colDim)}</th>`;
+      colKeys.forEach(c => {
+        html += `<th>${escapeHtml(c)}</th>`;
+      });
+      html += `<th class="bg-primary text-white">Row Grand Total</th></tr></thead><tbody>`;
+
+      // Format Rows
+      rowKeys.forEach(r => {
+        html += `<tr>`;
+        html += `<td class="pivot-row-label">${escapeHtml(r)}</td>`;
+        colKeys.forEach(c => {
+          const val = matrix[r][c];
+          let heatClass = "";
+          if (val > 0 && maxCellVal > 0) {
+            const ratio = val / maxCellVal;
+            if (ratio > 0.65) heatClass = "heat-high";
+            else if (ratio > 0.3) heatClass = "heat-med";
+          }
+          html += `<td class="${heatClass}">${formatMetricVal(val, metric)}</td>`;
+        });
+        html += `<td class="total-col">${formatMetricVal(rowTotals[r], metric)}</td>`;
+        html += `</tr>`;
+      });
+
+      // Format Column Grand Totals
+      html += `<tr class="total-row">`;
+      html += `<td class="pivot-row-label">Column Grand Total</td>`;
+      colKeys.forEach(c => {
+        html += `<td>${formatMetricVal(colTotals[c], metric)}</td>`;
+      });
+      html += `<td>${formatMetricVal(grandTotal, metric)}</td>`;
+      html += `</tr></tbody>`;
+
+      container.innerHTML = html;
+    }
+
+    function formatMetricVal(val, metric) {
+      if (!val || val === 0) return "-";
+      if (metric === 'volumeKL') return val.toFixed(2);
+      if (metric === 'qty' || metric === 'count') return Math.round(val).toLocaleString();
+      return val.toFixed(2);
+    }
+
+    /* =========================================================
+       6. PRIMARY CHARTS (Chart.js)
+       ========================================================= */
+    function renderPrimaryCharts() {
+      renderPrimaryTrendChart();
+      renderPrimarySegmentChart();
+      renderPrimaryStockistChart();
+      renderPrimaryPackSizeChart();
+    }
+
+    function togglePrimaryChartType(type) {
+      primaryChartType = type;
+      document.getElementById('btnChartStacked').classList.toggle('active', type === 'bar');
+      document.getElementById('btnChartLine').classList.toggle('active', type === 'line');
+      renderPrimaryTrendChart();
+    }
+
+    function renderPrimaryTrendChart() {
+      const ctx = document.getElementById('primaryTrendChart');
+      if (!ctx) return;
+      if (primaryTrendChartInstance) primaryTrendChartInstance.destroy();
+
+      // Aggregate Month vs Premium
+      const months = [...MONTH_ORDER];
+      const premKeys = ["PREMIUM", "ASPIRATIONAL", "MASS"];
+      const dataSeries = {
+        "PREMIUM": new Array(12).fill(0),
+        "ASPIRATIONAL": new Array(12).fill(0),
+        "MASS": new Array(12).fill(0)
+      };
+
+      filteredPrimaryData.forEach(d => {
+        const mIdx = months.indexOf(d.Month);
+        if (mIdx !== -1) {
+          const p = d.Premium || "MASS";
+          if (dataSeries[p]) dataSeries[p][mIdx] += (d.volumeKL || 0);
+        }
+      });
+
+      primaryTrendChartInstance = new Chart(ctx, {
+        type: primaryChartType,
+        data: {
+          labels: months,
+          datasets: [
+            {
+              label: 'PREMIUM',
+              data: dataSeries["PREMIUM"].map(v => +v.toFixed(2)),
+              backgroundColor: '#ff6600',
+              borderColor: '#ff6600',
+              fill: false,
+              tension: 0.2
+            },
+            {
+              label: 'ASPIRATIONAL',
+              data: dataSeries["ASPIRATIONAL"].map(v => +v.toFixed(2)),
+              backgroundColor: '#0284c7',
+              borderColor: '#0284c7',
+              fill: false,
+              tension: 0.2
+            },
+            {
+              label: 'MASS',
+              data: dataSeries["MASS"].map(v => +v.toFixed(2)),
+              backgroundColor: '#002b49',
+              borderColor: '#002b49',
+              fill: false,
+              tension: 0.2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { stacked: primaryChartType === 'bar' },
+            y: { 
+              stacked: primaryChartType === 'bar',
+              title: { display: true, text: 'Volume (KL)' }
+            }
+          },
+          plugins: {
+            legend: { position: 'top' },
+            tooltip: { mode: 'index', intersect: false }
+          }
+        }
+      });
+    }
+
+    function renderPrimarySegmentChart() {
+      const ctx = document.getElementById('primarySegmentChart');
+      if (!ctx) return;
+      if (primarySegmentChartInstance) primarySegmentChartInstance.destroy();
+
+      const segMap = {};
+      filteredPrimaryData.forEach(d => {
+        segMap[d.Segment] = (segMap[d.Segment] || 0) + (d.volumeKL || 0);
+      });
+
+      const labels = Object.keys(segMap);
+      const data = labels.map(l => +(segMap[l]).toFixed(2));
+
+      primarySegmentChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: [
+              '#002b49', '#ff6600', '#0284c7', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#64748b'
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'right' } }
+        }
+      });
+    }
+
+    function renderPrimaryStockistChart() {
+      const ctx = document.getElementById('primaryStockistChart');
+      if (!ctx) return;
+      if (primaryStockistChartInstance) primaryStockistChartInstance.destroy();
+
+      const stkMap = {};
+      filteredPrimaryData.forEach(d => {
+        stkMap[d.Stockist] = (stkMap[d.Stockist] || 0) + (d.volumeKL || 0);
+      });
+
+      const sortedStks = Object.keys(stkMap).sort((a,b) => stkMap[b] - stkMap[a]).slice(0, 7);
+      const data = sortedStks.map(s => +stkMap[s].toFixed(2));
+
+      primaryStockistChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: sortedStks.map(s => s.length > 18 ? s.substring(0, 16) + '...' : s),
+          datasets: [{
+            label: 'Primary KL',
+            data: data,
+            backgroundColor: '#002b49',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { x: { title: { display: true, text: 'KL' } } }
+        }
+      });
+    }
+
+    function renderPrimaryPackSizeChart() {
+      const ctx = document.getElementById('primaryPackSizeChart');
+      if (!ctx) return;
+      if (primaryPackSizeChartInstance) primaryPackSizeChartInstance.destroy();
+
+      const packMap = {};
+      filteredPrimaryData.forEach(d => {
+        packMap[d.PackSize] = (packMap[d.PackSize] || 0) + (d.volumeKL || 0);
+      });
+
+      const labels = Object.keys(packMap).sort((a,b) => packMap[b] - packMap[a]).slice(0, 6);
+      const data = labels.map(l => +packMap[l].toFixed(2));
+
+      primaryPackSizeChartInstance = new Chart(ctx, {
+        type: 'polarArea',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: [
+              'rgba(0, 43, 73, 0.75)',
+              'rgba(255, 102, 0, 0.75)',
+              'rgba(2, 132, 199, 0.75)',
+              'rgba(16, 185, 129, 0.75)',
+              'rgba(245, 158, 11, 0.75)',
+              'rgba(139, 92, 246, 0.75)'
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'right' } }
+        }
+      });
+    }
+
+    /* =========================================================
+       7. SECONDARY INTERFACE LOGIC, PIVOT & CHARTS
+       ========================================================= */
+    function applySecondaryFilters() {
+      const fy = document.getElementById('sFilterFY').value;
+      const m = document.getElementById('sFilterMonth').value;
+      const stk = document.getElementById('sFilterStockist').value;
+      const chn = document.getElementById('sFilterChannel').value;
+      const dist = document.getElementById('sFilterDistrict').value;
+      const ssf = document.getElementById('sFilterSSF').value;
+
+      filteredSecondaryData = secondaryDataStore.filter(item => {
+        if (fy !== 'ALL' && item.FY !== fy) return false;
+        if (m !== 'ALL' && item.Month !== m) return false;
+        if (stk !== 'ALL' && item.Stockist !== stk) return false;
+        if (chn !== 'ALL' && item.CustomerGroup !== chn) return false;
+        if (dist !== 'ALL' && item.District !== dist) return false;
+        if (ssf !== 'ALL' && item.SSF !== ssf) return false;
+        return true;
+      });
+
+      updateSecondaryKPIs();
+      renderSecondaryPivot();
+      renderSecondaryCharts();
+    }
+
+    function resetSecondaryFilters() {
+      document.getElementById('sFilterFY').value = 'FY 25-26';
+      document.getElementById('sFilterMonth').value = 'ALL';
+      document.getElementById('sFilterStockist').value = 'ALL';
+      document.getElementById('sFilterChannel').value = 'ALL';
+      document.getElementById('sFilterDistrict').value = 'ALL';
+      document.getElementById('sFilterSSF').value = 'ALL';
+      applySecondaryFilters();
+      showToast("Secondary filters reset to FY 25-26 baseline.");
+    }
+
+    function updateSecondaryKPIs() {
+      const totalKL = filteredSecondaryData.reduce((acc, c) => acc + (c.volumeKL || 0), 0);
+      const totalTaxableLakhs = filteredSecondaryData.reduce((acc, c) => acc + (c.taxableVal || 0), 0);
+      const totalCr = totalTaxableLakhs / 100;
+      const avgRealization = totalKL > 0 ? ((totalTaxableLakhs * 100000) / (totalKL * 1000)).toFixed(1) : '0';
+      const uniqueCounters = new Set(filteredSecondaryData.map(d => d.CustomerName)).size;
+      const uniqueSSFs = new Set(filteredSecondaryData.map(d => d.SSF)).size;
+
+      // Top customer channel
+      const chnMap = {};
+      filteredSecondaryData.forEach(d => {
+        chnMap[d.CustomerGroup] = (chnMap[d.CustomerGroup] || 0) + (d.volumeKL || 0);
+      });
+      let topChn = 'N/A';
+      let maxKL = -1;
+      Object.keys(chnMap).forEach(k => {
+        if (chnMap[k] > maxKL) {
+          maxKL = chnMap[k];
+          topChn = k;
+        }
+      });
+
+      document.getElementById('kpiSecVolume').innerText = totalKL.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+      document.getElementById('kpiSecValue').innerText = `₹${totalCr.toFixed(2)}`;
+      document.getElementById('kpiSecRealization').innerText = `₹${avgRealization}`;
+      document.getElementById('kpiSecCounters').innerText = uniqueCounters.toLocaleString('en-IN');
+      document.getElementById('kpiSecTopChannel').innerText = topChn;
+      document.getElementById('kpiSecSSFs').innerText = uniqueSSFs;
+    }
+
+    /* =========================================================
+       8. SECONDARY DYNAMIC PIVOT MATRIX GENERATOR
+       ========================================================= */
+    function renderSecondaryPivot() {
+      const rowDim = document.getElementById('sPivotRowDim').value;
+      const colDim = document.getElementById('sPivotColDim').value;
+      const metric = document.getElementById('sPivotMetric').value;
+      const container = document.getElementById('secondaryPivotTable');
+
+      if (!container) return;
+
+      if (rowDim === colDim) {
+        container.innerHTML = `<tr><td class="text-danger p-3 fw-bold">ROW Dimension and COLUMN Dimension cannot be identical (${rowDim}).</td></tr>`;
+        return;
+      }
+
+      const rowKeySet = new Set();
+      const colKeySet = new Set();
+
+      filteredSecondaryData.forEach(item => {
+        rowKeySet.add(item[rowDim] || "(Blank)");
+        colKeySet.add(item[colDim] || "(Blank)");
+      });
+
+      let rowKeys = Array.from(rowKeySet);
+      let colKeys = Array.from(colKeySet);
+
+      if (rowDim === 'Month') rowKeys.sort((a,b) => MONTH_ORDER.indexOf(a) - MONTH_ORDER.indexOf(b));
+      else rowKeys.sort();
+
+      if (colDim === 'Month') colKeys.sort((a,b) => MONTH_ORDER.indexOf(a) - MONTH_ORDER.indexOf(b));
+      else colKeys.sort();
+
+      const matrix = {};
+      const colTotals = {};
+      const rowTotals = {};
+      let grandTotal = 0;
+      let maxCellVal = 0;
+
+      rowKeys.forEach(r => {
+        matrix[r] = {};
+        rowTotals[r] = 0;
+        colKeys.forEach(c => {
+          matrix[r][c] = 0;
+          if (colTotals[c] === undefined) colTotals[c] = 0;
+        });
+      });
+
+      filteredSecondaryData.forEach(item => {
+        const rVal = item[rowDim] || "(Blank)";
+        const cVal = item[colDim] || "(Blank)";
+        let val = 0;
+
+        if (metric === 'volumeKL') val = item.volumeKL || 0;
+        else if (metric === 'taxableVal') val = item.taxableVal || 0;
+        else if (metric === 'count') val = 1;
+        else if (metric === 'avgRealization') val = item.realizationLitre || 0;
+
+        matrix[rVal][cVal] += val;
+        rowTotals[rVal] += val;
+        colTotals[cVal] += val;
+        grandTotal += val;
+
+        if (matrix[rVal][cVal] > maxCellVal) maxCellVal = matrix[rVal][cVal];
+      });
+
+      // HTML Render
+      let html = `<thead><tr>`;
+      html += `<th class="pivot-row-header-col">${escapeHtml(rowDim)} \\ ${escapeHtml(colDim)}</th>`;
+      colKeys.forEach(c => {
+        html += `<th>${escapeHtml(c)}</th>`;
+      });
+      html += `<th class="bg-warning text-dark">Row Grand Total</th></tr></thead><tbody>`;
+
+      rowKeys.forEach(r => {
+        html += `<tr>`;
+        html += `<td class="pivot-row-label">${escapeHtml(r)}</td>`;
+        colKeys.forEach(c => {
+          const val = matrix[r][c];
+          let heatClass = "";
+          if (val > 0 && maxCellVal > 0) {
+            const ratio = val / maxCellVal;
+            if (ratio > 0.65) heatClass = "heat-high";
+            else if (ratio > 0.3) heatClass = "heat-med";
+          }
+          html += `<td class="${heatClass}">${formatSecMetricVal(val, metric)}</td>`;
+        });
+        html += `<td class="total-col">${formatSecMetricVal(rowTotals[r], metric)}</td>`;
+        html += `</tr>`;
+      });
+
+      // Total Row
+      html += `<tr class="total-row">`;
+      html += `<td class="pivot-row-label">Column Grand Total</td>`;
+      colKeys.forEach(c => {
+        html += `<td>${formatSecMetricVal(colTotals[c], metric)}</td>`;
+      });
+      html += `<td>${formatSecMetricVal(grandTotal, metric)}</td>`;
+      html += `</tr></tbody>`;
+
+      container.innerHTML = html;
+    }
+
+    function formatSecMetricVal(val, metric) {
+      if (!val || val === 0) return "-";
+      if (metric === 'volumeKL') return val.toFixed(2);
+      if (metric === 'taxableVal') return `₹${val.toFixed(2)}L`;
+      if (metric === 'count') return Math.round(val).toLocaleString();
+      if (metric === 'avgRealization') return `₹${val.toFixed(1)}`;
+      return val.toFixed(2);
+    }
+
+    /* =========================================================
+       9. SECONDARY CHARTS (Chart.js)
+       ========================================================= */
+    function renderSecondaryCharts() {
+      renderSecondaryMonthlyChart();
+      renderSecondaryChannelChart();
+      renderSecondaryDistrictChart();
+      renderSecondarySSFChart();
+    }
+
+    function renderSecondaryMonthlyChart() {
+      const ctx = document.getElementById('secondaryMonthlyChart');
+      if (!ctx) return;
+      if (secondaryMonthlyChartInstance) secondaryMonthlyChartInstance.destroy();
+
+      const months = [...MONTH_ORDER];
+      const monthlyKL = new Array(12).fill(0);
+      const monthlyValCr = new Array(12).fill(0);
+
+      filteredSecondaryData.forEach(d => {
+        const idx = months.indexOf(d.Month);
+        if (idx !== -1) {
+          monthlyKL[idx] += (d.volumeKL || 0);
+          monthlyValCr[idx] += ((d.taxableVal || 0) / 100); // lakhs to Cr
+        }
+      });
+
+      secondaryMonthlyChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: months,
+          datasets: [
+            {
+              label: 'Secondary Volume (KL)',
+              data: monthlyKL.map(v => +v.toFixed(2)),
+              backgroundColor: '#ff6600',
+              borderRadius: 4,
+              yAxisID: 'y'
+            },
+            {
+              label: 'Billed Value (₹ Crores)',
+              data: monthlyValCr.map(v => +v.toFixed(2)),
+              type: 'line',
+              borderColor: '#10b981',
+              backgroundColor: '#10b981',
+              tension: 0.2,
+              fill: false,
+              yAxisID: 'y1'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'top' } },
+          scales: {
+            y: {
+              type: 'linear',
+              position: 'left',
+              title: { display: true, text: 'Volume (KL)' }
+            },
+            y1: {
+              type: 'linear',
+              position: 'right',
+              title: { display: true, text: 'Value (₹ Cr)' },
+              grid: { drawOnChartArea: false }
+            }
+          }
+        }
+      });
+    }
+
+    function renderSecondaryChannelChart() {
+      const ctx = document.getElementById('secondaryChannelChart');
+      if (!ctx) return;
+      if (secondaryChannelChartInstance) secondaryChannelChartInstance.destroy();
+
+      const chnMap = {};
+      filteredSecondaryData.forEach(d => {
+        chnMap[d.CustomerGroup] = (chnMap[d.CustomerGroup] || 0) + (d.volumeKL || 0);
+      });
+
+      const labels = Object.keys(chnMap);
+      const data = labels.map(l => +chnMap[l].toFixed(2));
+
+      secondaryChannelChartInstance = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: ['#002b49', '#ff6600', '#10b981', '#f59e0b', '#64748b']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'right' } }
+        }
+      });
+    }
+
+    function renderSecondaryDistrictChart() {
+      const ctx = document.getElementById('secondaryDistrictChart');
+      if (!ctx) return;
+      if (secondaryDistrictChartInstance) secondaryDistrictChartInstance.destroy();
+
+      const distMap = {};
+      filteredSecondaryData.forEach(d => {
+        distMap[d.District] = (distMap[d.District] || 0) + (d.volumeKL || 0);
+      });
+
+      const labels = Object.keys(distMap).sort((a,b) => distMap[b] - distMap[a]);
+      const data = labels.map(l => +distMap[l].toFixed(2));
+
+      secondaryDistrictChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Volume (KL)',
+            data: data,
+            backgroundColor: '#0284c7',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { title: { display: true, text: 'KL' } } }
+        }
+      });
+    }
+
+    function renderSecondarySSFChart() {
+      const ctx = document.getElementById('secondarySSFChart');
+      if (!ctx) return;
+      if (secondarySSFChartInstance) secondarySSFChartInstance.destroy();
+
+      const ssfMap = {};
+      filteredSecondaryData.forEach(d => {
+        ssfMap[d.SSF] = (ssfMap[d.SSF] || 0) + (d.volumeKL || 0);
+      });
+
+      const labels = Object.keys(ssfMap).sort((a,b) => ssfMap[b] - ssfMap[a]).slice(0, 6);
+      const data = labels.map(l => +ssfMap[l].toFixed(2));
+
+      secondarySSFChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'SSF Volume (KL)',
+            data: data,
+            backgroundColor: '#ff6600',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    /* =========================================================
+       8. EXCEL FILE UPLOAD & DYNAMIC SHEETJS PARSER
+       ========================================================= */
+    function handlePrimaryFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const statusMsg = document.getElementById('uploadStatusMsg');
+      const statusText = document.getElementById('uploadStatusText');
+      statusMsg.classList.remove('d-none');
+      statusText.innerText = `Parsing Primary file "${file.name}" across all sheets...`;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const parsedRecords = [];
+
+          workbook.SheetNames.forEach(sheetName => {
+            const worksheet = workbook.Sheets[sheetName];
+            const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+            
+            // Normalize columns
+            json.forEach(row => {
+              const fy = row['FY'] || row['Financial Year'] || sheetName || "FY 25-26";
+              const month = (row['Month'] || row['BILLING MONTH'] || "APR").toString().toUpperCase().substring(0, 3);
+              const stk = row['STOCKIST NAME'] || row['Stockist'] || row['SSR NAME'] || row['CUSTOMER NAME'] || "Default Stockist";
+              const seg = row['SEGMENTATION'] || row['Segment'] || row['PRODUCT CATEGORY'] || "DEO";
+              const prod = row['PRODUCT NAME'] || row['Product'] || row['DESCRIPTION'] || "SERVO Lube";
+              const prem = (row['PREMIUM'] || row['Category'] || (seg.includes('4T') ? 'PREMIUM' : 'MASS')).toString().toUpperCase();
+              const psize = row['PACK SIZE'] || row['PackSize'] || "210 L";
+              const qty = parseFloat(row['INVOICED QUANTITY'] || row['Qty'] || row['Billing Qty'] || 1);
+              const vol = parseFloat(row['VOL IN KL'] || row['Volume (KL)'] || row['KL'] || (qty * 0.05));
+
+              parsedRecords.push({
+                FY: fy,
+                Month: month,
+                Stockist: stk.toString().trim(),
+                Segment: seg.toString().trim(),
+                ProductName: prod.toString().trim(),
+                Premium: prem.includes('PREM') ? 'PREMIUM' : (prem.includes('ASPIR') ? 'ASPIRATIONAL' : 'MASS'),
+                PackSize: psize.toString().trim(),
+                Assorted: (seg.includes('4T') ? '4T' : 'ASSORTED'),
+                quantity: isNaN(qty) ? 1 : qty,
+                volumeKL: isNaN(vol) ? 0.05 : vol
+              });
+            });
+          });
+
+          if (parsedRecords.length > 0) {
+            primaryDataStore = parsedRecords;
+            populateFilterOptions();
+            applyPrimaryFilters();
+
+            document.getElementById('primaryFileStatus').innerText = `✓ Loaded ${parsedRecords.length} records (${file.name})`;
+            document.getElementById('primaryFileStatus').className = "badge bg-success text-white px-2 py-1";
+            statusMsg.classList.add('d-none');
+            showToast(`Primary report loaded with ${parsedRecords.length} records!`);
+          } else {
+            throw new Error("No data rows found in Primary file.");
+          }
+        } catch (err) {
+          statusMsg.classList.remove('d-none');
+          statusText.innerText = "Error parsing file: " + err.message;
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function handleSecondaryFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const statusMsg = document.getElementById('uploadStatusMsg');
+      const statusText = document.getElementById('uploadStatusText');
+      statusMsg.classList.remove('d-none');
+      statusText.innerText = `Parsing Secondary file "${file.name}" across all sheets...`;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const parsedRecords = [];
+
+          workbook.SheetNames.forEach(sheetName => {
+            const worksheet = workbook.Sheets[sheetName];
+            const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+            json.forEach(row => {
+              const fy = row['FY'] || row['Financial Year'] || sheetName || "FY 25-26";
+              const month = (row['Month'] || row['BILLING MONTH'] || "APR").toString().toUpperCase().substring(0, 3);
+              const stk = row['STOCKIST NAME'] || row['Stockist'] || row['PARENT STOCKIST'] || "Default Stockist";
+              const cust = row['CUSTOMER NAME'] || row['Customer'] || row['COUNTER NAME'] || "Retail Counter";
+              const grp = (row['CUSTOMER GROUP'] || row['Group'] || row['CHANNEL'] || "DEALER").toString().toUpperCase();
+              const dist = row['CUSTOMER DISTRICT'] || row['District'] || "DURGAPUR";
+              const ssf = row['SSF NAME'] || row['SSF'] || row['FSO'] || "Representative";
+              const volLtr = parseFloat(row['TOTAL VOLUME (L/KG)'] || row['Volume (L)'] || 0);
+              const volKL = parseFloat(row['VOL IN KL'] || (volLtr > 0 ? volLtr / 1000 : 0.05));
+              const taxable = parseFloat(row['TAXABLE AMOUNT'] || row['Taxable Val'] || row['AMOUNT'] || 15000) / 100000; // in Lakhs
+              const invVal = parseFloat(row['TOTAL INVOICE VALUE'] || (taxable * 1.18 * 100000)) / 100000;
+
+              parsedRecords.push({
+                FY: fy,
+                Month: month,
+                Stockist: stk.toString().trim(),
+                CustomerName: cust.toString().trim(),
+                CustomerGroup: grp.trim(),
+                District: dist.toString().trim(),
+                SSF: ssf.toString().trim(),
+                Segment: "Commercial Lube",
+                ProductName: row['PRODUCT NAME'] || "SERVO Grade",
+                volumeKL: isNaN(volKL) ? 0.05 : volKL,
+                taxableVal: isNaN(taxable) ? 0.1 : taxable,
+                invoiceVal: isNaN(invVal) ? 0.12 : invVal,
+                realizationLitre: volKL > 0 ? (taxable * 100000) / (volKL * 1000) : 180
+              });
+            });
+          });
+
+          if (parsedRecords.length > 0) {
+            secondaryDataStore = parsedRecords;
+            populateFilterOptions();
+            applySecondaryFilters();
+
+            document.getElementById('secondaryFileStatus').innerText = `✓ Loaded ${parsedRecords.length} records (${file.name})`;
+            document.getElementById('secondaryFileStatus').className = "badge bg-success text-white px-2 py-1";
+            statusMsg.classList.add('d-none');
+            showToast(`Secondary report loaded with ${parsedRecords.length} records!`);
+          } else {
+            throw new Error("No data rows found in Secondary file.");
+          }
+        } catch (err) {
+          statusMsg.classList.remove('d-none');
+          statusText.innerText = "Error parsing file: " + err.message;
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    /* =========================================================
+       12. CSV EXPORT UTILITIES
+       ========================================================= */
+    function exportPivotToCSV(tableId, filename) {
+      exportTableToCSV(tableId, filename);
+    }
+
+    function exportTableToCSV(tableId, filename) {
+      const table = document.getElementById(tableId);
+      if (!table) return;
+
+      let csv = [];
+      const rows = table.querySelectorAll('tr');
+
+      rows.forEach(row => {
+        const cols = row.querySelectorAll('th, td');
+        const rowData = [];
+        cols.forEach(col => {
+          let text = col.innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/,/g, ' ');
+          rowData.push(`"${text.trim()}"`);
+        });
+        csv.push(rowData.join(','));
+      });
+
+      const csvContent = "data:text/csv;charset=utf-8," + csv.join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast(`Exported ${filename} successfully!`);
+    }
+
+    /* Helper Utilities */
+    function escapeHtml(string) {
+      return String(string)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function showToast(message) {
+      const toastEl = document.getElementById('liveToast');
+      document.getElementById('toastMessage').innerText = message;
+      const toast = new bootstrap.Toast(toastEl, { delay: 3500 });
+      toast.show();
+    }
+
+    /* =========================================================
+       13. INITIALIZATION ON WINDOW LOAD
+       ========================================================= */
+    window.onload = function() {
+      loadSampleData(false);
+
+      // Drag & drop visual listeners
+      ['primaryDropZone', 'secondaryDropZone'].forEach(id => {
+        const dropZone = document.getElementById(id);
+        if (!dropZone) return;
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+          dropZone.addEventListener(eventName, e => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.add('dragover');
+          }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+          dropZone.addEventListener(eventName, e => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.remove('dragover');
+          }, false);
+        });
+      });
+
+      document.getElementById('primaryDropZone').addEventListener('drop', e => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length) {
+          handlePrimaryFileUpload({ target: { files: files } });
+        }
+      });
+
+      document.getElementById('secondaryDropZone').addEventListener('drop', e => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length) {
+          handleSecondaryFileUpload({ target: { files: files } });
+        }
+      });
+    };
+  </script>
+</body>
+</html>

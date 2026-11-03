@@ -593,17 +593,17 @@
             </div>
             <div class="col-6 col-md-4 col-xl-2">
               <div class="kpi-card kpi-purple">
-                <div class="kpi-title">Major Product Segment</div>
+                <div class="kpi-title">Major Product Segment 26-27</div>
                 <div class="kpi-value text-truncate" style="font-size: 1.25rem;" id="kpiPriMajorProdSeg">Loading...</div>
                 <small id="kpiPriMajorProdSegVol" class="fw-bold text-muted">0 KL (0.0%)</small>
               </div>
             </div>
           </div>
 
-          <!-- Row 1: Primary Monthly Comparison & Segmentation Mix -->
+          <!-- Row 1: Primary Monthly Comparison -->
           <div class="row g-3 mb-3">
-            <div class="col-12 col-lg-7">
-              <div class="dashboard-card p-3 h-100">
+            <div class="col-12">
+              <div class="dashboard-card p-3">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <h6 class="fw-bold text-dark mb-0">
                     <i class="fa-solid fa-code-compare text-primary me-2"></i>Primary Monthly Comparison: FY 25-26 vs FY 26-27 vs Target (KL)
@@ -615,21 +615,40 @@
                 </div>
               </div>
             </div>
+          </div>
 
-            <div class="col-12 col-lg-5">
+          <!-- Row 2: BOTH CHARTS SIDE BY SIDE (Segmentation Mix & Monthly Upliftment Distribution) -->
+          <div class="row g-3 mb-3">
+            <div class="col-12 col-lg-6">
               <div class="dashboard-card p-3 h-100">
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                  <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-chart-pie text-warning me-2"></i>Segmentation Mix (with Volume & Share %)</h6>
-                  <span class="badge bg-light text-secondary border" id="primarySegFYBadge">FY 26-27</span>
+                  <h6 class="fw-bold text-dark mb-0">
+                    <i class="fa-solid fa-chart-pie text-warning me-2"></i>Segmentation Mix (Product segment 26-27)
+                  </h6>
+                  <span class="badge bg-light text-secondary border" id="primarySegFYBadge">FY 26-27 (Current)</span>
                 </div>
-                <div style="height: 280px; position: relative;">
+                <div style="height: 270px; position: relative;">
                   <canvas id="primarySegmentChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-6">
+              <div class="dashboard-card p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h6 class="fw-bold text-dark mb-0">
+                    <i class="fa-solid fa-clock-rotate-left text-primary me-2"></i>Monthly Upliftment Distribution (1-15th, 16-25th, 26th-End)
+                  </h6>
+                  <span class="badge bg-light text-secondary border" id="primaryUpliftFYBadge">FY 26-27 (Current)</span>
+                </div>
+                <div style="height: 270px; position: relative;">
+                  <canvas id="primaryUpliftmentChart"></canvas>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Row 2: Category Trajectory & Pack Size Mix -->
+          <!-- Row 3: Category Trajectory & Pack Size Mix -->
           <div class="row g-3 mb-3">
             <div class="col-12 col-lg-7">
               <div class="dashboard-card p-3 h-100">
@@ -661,13 +680,13 @@
             </div>
           </div>
 
-          <!-- Row 3: Product Segment Performance -->
+          <!-- Row 4: Product Segment Performance -->
           <div class="row g-3 mb-3">
             <div class="col-12">
               <div class="dashboard-card p-3">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <h6 class="fw-bold text-dark mb-0">
-                    <i class="fa-solid fa-layer-group text-info me-2"></i>Product Segment Performance (FY 25-26 vs FY 26-27 in KL)
+                    <i class="fa-solid fa-layer-group text-info me-2"></i>Product Segment Performance (Column T: FY 25-26 vs FY 26-27 in KL)
                   </h6>
                 </div>
                 <div style="height: 250px; position: relative;">
@@ -1075,9 +1094,8 @@
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- ================= INLINE SCRIPT: DATA STORE, PARSERS & CHARTS ================= -->
+  <!-- ================= INLINE SCRIPT ================= -->
   <script>
-    // PRE-INITIALIZE GOOGLE VISUALIZATION HANDLER SO JSONP CAN NEVER THROW UNHANDLED ERRORS
     window.google = window.google || {};
     window.google.visualization = window.google.visualization || {};
     window.google.visualization.Query = window.google.visualization.Query || {};
@@ -1122,6 +1140,7 @@
 
     let primaryComparisonChartInstance = null;
     let primarySegmentChartInstance = null;
+    let primaryUpliftmentChartInstance = null;
     let primaryTrendChartInstance = null;
     let primaryPackSizeChartInstance = null;
     let primaryProductSegmentChartInstance = null;
@@ -1148,6 +1167,37 @@
       return MONTH_ORDER.includes(str) ? str : "APR";
     }
 
+    // Advanced date parser supporting native Date, GViz Date(Y, M, D), strings, and numbers
+    function extractDayFromDate(dateVal) {
+      if (!dateVal && dateVal !== 0) return 15;
+      if (typeof dateVal === 'number') {
+        const d = Math.round(dateVal);
+        if (d >= 1 && d <= 31) return d;
+      }
+      const s = dateVal.toString().trim();
+      if (s.startsWith("Date(") && s.endsWith(")")) {
+        try {
+          const parts = s.slice(5, -1).split(',');
+          if (parts.length >= 3) {
+            const day = parseInt(parts[2].trim(), 10);
+            if (!isNaN(day) && day >= 1 && day <= 31) return day;
+          }
+        } catch(e) {}
+      }
+      // Try parsing with Date object or regex
+      const dt = new Date(s);
+      if (!isNaN(dt.getTime())) {
+        const d = dt.getDate();
+        if (d >= 1 && d <= 31) return d;
+      }
+      const m = s.match(/\b(0?[1-9]|[12][0-9]|3[01])\b/);
+      if (m) {
+        const d = parseInt(m[1], 10);
+        if (d >= 1 && d <= 31) return d;
+      }
+      return 15;
+    }
+
     function setText(id, text) {
       const el = document.getElementById(id);
       if (el) el.innerText = text;
@@ -1170,7 +1220,6 @@
 
     /* =========================================================
        INITIAL EMBEDDED SEED DATA
-       Guarantees charts and metrics are immediately populated
        ========================================================= */
     function loadInitialSeedData() {
       if (primaryDataStore.length > 0) return;
@@ -1194,11 +1243,11 @@
 
       pStockists.forEach(stk => {
         MONTH_ORDER.forEach((m, mIdx) => {
-          // FY 25-26
           const v25 = (stk.y25 / 12) * (0.8 + (mIdx % 5) * 0.1);
           pSeeds.push({
             FY: "FY 25-26",
             Month: m,
+            InvDay: ((mIdx * 7) % 28) + 1,
             Stockist: stk.name,
             Segment: segs[mIdx % segs.length],
             ProductSegment: prodSegs[mIdx % prodSegs.length],
@@ -1210,12 +1259,12 @@
             volumeKL: v25
           });
 
-          // FY 26-27
           if (mIdx < 8 && stk.y26 > 0) {
             const v26 = (stk.y26 / 8) * (0.85 + (mIdx % 4) * 0.1);
             pSeeds.push({
               FY: "FY 26-27",
               Month: m,
+              InvDay: ((mIdx * 9) % 28) + 1,
               Stockist: stk.name,
               Segment: segs[mIdx % segs.length],
               ProductSegment: prodSegs[mIdx % prodSegs.length],
@@ -1229,7 +1278,6 @@
           }
         });
 
-        // Secondary records
         MONTH_ORDER.forEach((m, mIdx) => {
           sSeeds.push({
             FY: "FY 25-26",
@@ -1733,7 +1781,7 @@
     }
 
     /* =========================================================
-       SEQUENTIAL & ROBUST GOOGLE SHEETS SYNC PIPELINE
+       ROBUST GOOGLE SHEETS SYNC PIPELINE
        ========================================================= */
     function loadSingleSheetGViz(sheetName, gid, timeoutMs = 25000) {
       return new Promise((resolve, reject) => {
@@ -1753,7 +1801,6 @@
           if (script.parentNode) script.parentNode.removeChild(script);
         }
 
-        // Catch Google's default callback response
         window.google.visualization.Query.setResponse = function(response) {
           if (done) return;
           done = true;
@@ -1788,7 +1835,7 @@
           if (!done) {
             done = true;
             cleanup();
-            reject(new Error(`CORS or connection block on ${sheetName}`));
+            reject(new Error(`Connection block on ${sheetName}`));
           }
         };
 
@@ -1822,6 +1869,8 @@
             records.forEach(row => {
               const rawStk = row['Stockist Name'] || row['Name'] || row['SSR NAME'] || row['CUSTOMER NAME'] || "Unknown Stockist";
               const rawMonth = row['Month'] || row['BILLING MONTH'];
+              const rawDate = row['Inv.Date'] || row['Invoice Date'] || "";
+              const invDay = extractDayFromDate(rawDate);
               const seg = (row['SEGMENTATION'] || row['Segment'] || row['PRODUCT CATEGORY'] || "DEO").toString().trim();
               const colS = (row['Category'] || row['Categorisation'] || row['Premium'] || "MASS").toString().trim().toUpperCase();
               const prodSegment = (row['Product segment 26-27'] || row['Product Segment'] || seg).toString().trim();
@@ -1832,6 +1881,8 @@
               newPrimary.push({
                 FY: item.fy,
                 Month: normalizeMonth(rawMonth),
+                InvDate: rawDate,
+                InvDay: invDay,
                 Stockist: rawStk.toString().trim(),
                 Segment: seg,
                 ProductSegment: prodSegment || "OTHER",
@@ -1894,7 +1945,6 @@
       if (newPrimary.length > 0) primaryDataStore = newPrimary;
       if (newSecondary.length > 0) secondaryDataStore = newSecondary;
 
-      // Update Target mapping for all stockists
       const fetchedStks = [...new Set(primaryDataStore.map(d => d.Stockist))];
       fetchedStks.forEach(stk => {
         if (!stockistTargetStore[stk]) {
@@ -1988,7 +2038,7 @@
 
       const isBothFY = (fy === 'ALL');
       const effFYLabel = isBothFY ? 'FY 26-27 (Current)' : fy;
-      ['primaryCatFYBadge', 'primarySegFYBadge', 'primaryPackFYBadge'].forEach(id => {
+      ['primaryCatFYBadge', 'primarySegFYBadge', 'primaryUpliftFYBadge', 'primaryPackFYBadge'].forEach(id => {
         setText(id, effFYLabel);
       });
 
@@ -2068,7 +2118,6 @@
       const pctElem = document.getElementById('kpiPriYoYPct');
       if (pctElem) pctElem.className = 'fw-bold ' + (diffPct >= 0 ? 'text-success' : 'text-danger');
 
-      setText('kpiPriPremRatio', formatPct(premRatio));
       setText('kpiPriMajorProdSeg', majorProdSeg);
       setText('kpiPriMajorProdSegVol', `${formatVol(maxProdSegKL)} KL (${formatPct(majorProdSegPct)})`);
     }
@@ -2083,6 +2132,7 @@
     function renderPrimaryCharts(selectedFY = 'ALL') {
       renderPrimaryComparisonChart();
       renderPrimarySegmentChart(selectedFY);
+      renderPrimaryUpliftmentChart(selectedFY);
       renderPrimaryTrendChart(selectedFY);
       renderPrimaryPackSizeChart(selectedFY);
       renderPrimaryProductSegmentChart();
@@ -2170,6 +2220,119 @@
       });
     }
 
+    function renderPrimarySegmentChart(selectedFY = 'ALL') {
+      const ctx = document.getElementById('primarySegmentChart');
+      if (!ctx) return;
+      if (primarySegmentChartInstance) primarySegmentChartInstance.destroy();
+
+      const chartData = getBreakdownData(selectedFY);
+
+      const segMap = {};
+      let totalKL = 0;
+      chartData.forEach(d => {
+        const segKey = d.ProductSegment || "OTHER";
+        const vol = d.volumeKL || 0;
+        segMap[segKey] = (segMap[segKey] || 0) + vol;
+        totalKL += vol;
+      });
+
+      const labels = Object.keys(segMap).sort((a,b) => segMap[b] - segMap[a]);
+      const data = labels.map(l => Math.round(segMap[l]));
+      const percentages = labels.map(l => totalKL > 0 ? ((segMap[l] / totalKL) * 100).toFixed(1) : "0.0");
+
+      primarySegmentChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels.map((l, i) => `${l} (${percentages[i]}%)`),
+          datasets: [{
+            data: data,
+            backgroundColor: [
+              '#002b49', '#ff6600', '#0284c7', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#64748b', '#14b8a6'
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false,
+          plugins: {
+            legend: { position: 'right' },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const val = context.raw || 0;
+                  const pct = totalKL > 0 ? ((val / totalKL) * 100).toFixed(1) : "0.0";
+                  return ` ${context.label}: ${formatVol(val)} KL (${pct}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderPrimaryUpliftmentChart(selectedFY = 'ALL') {
+      const ctx = document.getElementById('primaryUpliftmentChart');
+      if (!ctx) return;
+      if (primaryUpliftmentChartInstance) primaryUpliftmentChartInstance.destroy();
+
+      const chartData = getBreakdownData(selectedFY);
+
+      let v1_15 = 0;
+      let v16_25 = 0;
+      let v26_end = 0;
+      let totalKL = 0;
+
+      chartData.forEach(d => {
+        const vol = d.volumeKL || 0;
+        const day = d.InvDay || 15;
+        totalKL += vol;
+        if (day <= 15) {
+          v1_15 += vol;
+        } else if (day <= 25) {
+          v16_25 += vol;
+        } else {
+          v26_end += vol;
+        }
+      });
+
+      const p1 = totalKL > 0 ? ((v1_15 / totalKL) * 100).toFixed(1) : "0.0";
+      const p2 = totalKL > 0 ? ((v16_25 / totalKL) * 100).toFixed(1) : "0.0";
+      const p3 = totalKL > 0 ? ((v26_end / totalKL) * 100).toFixed(1) : "0.0";
+
+      primaryUpliftmentChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: [
+            `1st - 15th (${p1}%)`,
+            `16th - 25th (${p2}%)`,
+            `26th - End (${p3}%)`
+          ],
+          datasets: [{
+            data: [Math.round(v1_15), Math.round(v16_25), Math.round(v26_end)],
+            backgroundColor: ['#0284c7', '#ff6600', '#002b49']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false,
+          plugins: {
+            legend: { position: 'right' },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const val = context.raw || 0;
+                  const pct = totalKL > 0 ? ((val / totalKL) * 100).toFixed(1) : "0.0";
+                  return ` ${context.label}: ${formatVol(val)} KL (${pct}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
     function togglePrimaryChartType(type) {
       primaryChartType = type;
       document.getElementById('btnChartStacked')?.classList.toggle('active', type === 'bar');
@@ -2239,56 +2402,6 @@
               intersect: false,
               callbacks: {
                 label: ctx => ` ${ctx.dataset.label}: ${formatVol(ctx.raw)} KL`
-              }
-            }
-          }
-        }
-      });
-    }
-
-    function renderPrimarySegmentChart(selectedFY = 'ALL') {
-      const ctx = document.getElementById('primarySegmentChart');
-      if (!ctx) return;
-      if (primarySegmentChartInstance) primarySegmentChartInstance.destroy();
-
-      const chartData = getBreakdownData(selectedFY);
-
-      const segMap = {};
-      let totalKL = 0;
-      chartData.forEach(d => {
-        const vol = d.volumeKL || 0;
-        segMap[d.Segment] = (segMap[d.Segment] || 0) + vol;
-        totalKL += vol;
-      });
-
-      const labels = Object.keys(segMap);
-      const data = labels.map(l => Math.round(segMap[l]));
-      const percentages = labels.map(l => totalKL > 0 ? ((segMap[l] / totalKL) * 100).toFixed(1) : "0.0");
-
-      primarySegmentChartInstance = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: labels.map((l, i) => `${l} (${percentages[i]}%)`),
-          datasets: [{
-            data: data,
-            backgroundColor: [
-              '#002b49', '#ff6600', '#0284c7', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#64748b'
-            ]
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          animation: false,
-          plugins: {
-            legend: { position: 'right' },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  const val = context.raw || 0;
-                  const pct = totalKL > 0 ? ((val / totalKL) * 100).toFixed(1) : "0.0";
-                  return ` ${context.label}: ${formatVol(val)} KL (${pct}%)`;
-                }
               }
             }
           }
@@ -2565,19 +2678,16 @@
       const diffKL = volFY26 - volFY25;
       const diffPct = volFY25 > 0 ? ((diffKL / volFY25) * 100) : 0;
 
-      // Active Dealers & Volume (CustomerGroup: Dealer) STRICTLY OF CURRENT FY (FY 26-27)
       const currentFYSecondary = baseForComparison.filter(d => d.FY === 'FY 26-27');
       
       const dealerRecords = currentFYSecondary.filter(d => d.CustomerGroup === 'Dealer');
       const dealerCustomers = new Set(dealerRecords.map(d => d.CustomerName));
       const dealerVolKL = dealerRecords.reduce((acc, c) => acc + (c.volumeKL || 0), 0);
 
-      // Bazaar + SERVOXPERT for Current FY (FY 26-27)
       const bazaarRecordsFY26 = currentFYSecondary.filter(d => d.CustomerGroup === 'BAZAAR + SERVOXPERT');
       const countFY26 = new Set(bazaarRecordsFY26.map(d => d.CustomerName)).size;
       const bazaarVolKL = bazaarRecordsFY26.reduce((acc, c) => acc + (c.volumeKL || 0), 0);
 
-      // Bazaar + SERVOXPERT for FY 25-26 (ENTIRE 12 MONTHS OF THE YEAR)
       const bazaarRecordsFY25Full = secondaryDataStore.filter(d => {
         if (d.FY !== 'FY 25-26') return false;
         if (!selectedSecondaryStockists.has(d.Stockist)) return false;
@@ -2977,6 +3087,8 @@
             json.forEach(row => {
               const fy = row['FY'] || row['Financial Year'] || (sheetName.includes('26-27') ? 'FY 26-27' : 'FY 25-26');
               const rawStk = row['Stockist Name'] || row['Name'] || row['Stockist'] || "Stockist";
+              const rawDate = row['Inv.Date'] || row['Invoice Date'] || "";
+              const invDay = extractDayFromDate(rawDate);
               const seg = (row['SEGMENTATION'] || row['Segment'] || "DEO").toString().trim();
               const colS = (row['Category'] || row['Categorisation'] || row['Premium'] || "MASS").toString().trim().toUpperCase();
               const prodSegment = (row['Product segment 26-27'] || row['Product Segment'] || seg).toString().trim();
@@ -2986,6 +3098,8 @@
               parsedRecords.push({
                 FY: fy,
                 Month: normalizeMonth(row['Month']),
+                InvDate: rawDate,
+                InvDay: invDay,
                 Stockist: rawStk.toString().trim(),
                 Segment: seg,
                 ProductSegment: prodSegment || "OTHER",
@@ -3039,7 +3153,7 @@
               let grpNorm = rawGrp;
               if (rawGrp.toLowerCase() === 'dealer') {
                 grpNorm = 'Dealer';
-              } else if (rawGrp.toUpperCase() === 'BAZAAR' || rawGrp.toUpperCase() === 'SERVOXPERT' || rawGrp.toUpperCase().includes('BAZAAR') || rawGrp.toUpperCase().includes('SERVOXPERT')) {
+              } else if (rawGrp.toUpperCase().includes('BAZAAR') || rawGrp.toUpperCase().includes('SERVOXPERT')) {
                 grpNorm = 'BAZAAR + SERVOXPERT';
               } else if (rawGrp.toUpperCase() === 'FLEET') {
                 grpNorm = 'FLEET';

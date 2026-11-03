@@ -467,6 +467,7 @@
             </div>
           </div>
           <div class="row g-2">
+            <!-- Multi-Stockist Filter -->
             <div class="col-12 col-sm-6 col-md-4 col-xl-3">
               <label class="form-label-xs text-primary"><i class="fa-solid fa-users-viewfinder me-1"></i> Stockists (Multi-Select)</label>
               <div class="dropdown">
@@ -487,6 +488,7 @@
               </div>
             </div>
 
+            <!-- Financial Year -->
             <div class="col-12 col-sm-6 col-md-2 col-xl-2">
               <label class="form-label-xs">Financial Year (FY)</label>
               <select id="pFilterFY" class="form-select form-select-sm" onchange="applyPrimaryFilters()">
@@ -496,6 +498,7 @@
               </select>
             </div>
 
+            <!-- MULTI-MONTH SELECTION DROPDOWN -->
             <div class="col-12 col-sm-6 col-md-3 col-xl-2">
               <label class="form-label-xs"><i class="fa-solid fa-calendar-days text-primary me-1"></i> Billing Months (Multi)</label>
               <div class="dropdown">
@@ -516,6 +519,7 @@
               </div>
             </div>
 
+            <!-- PRODUCT SEGMENT FILTER -->
             <div class="col-12 col-sm-6 col-md-3 col-xl-2">
               <label class="form-label-xs text-dark"><i class="fa-solid fa-layer-group text-primary me-1"></i> Product Segment</label>
               <select id="pFilterProdSegment" class="form-select form-select-sm" onchange="applyPrimaryFilters()">
@@ -523,6 +527,7 @@
               </select>
             </div>
 
+            <!-- Segmentation / General -->
             <div class="col-12 col-sm-6 col-md-3 col-xl-1">
               <label class="form-label-xs">Segment</label>
               <select id="pFilterSegment" class="form-select form-select-sm" onchange="applyPrimaryFilters()">
@@ -530,6 +535,7 @@
               </select>
             </div>
 
+            <!-- Category (Column S) -->
             <div class="col-12 col-sm-6 col-md-3 col-xl-1">
               <label class="form-label-xs">Category</label>
               <select id="pFilterPremium" class="form-select form-select-sm" onchange="applyPrimaryFilters()">
@@ -537,6 +543,7 @@
               </select>
             </div>
 
+            <!-- Pack Size -->
             <div class="col-12 col-sm-6 col-md-3 col-xl-1">
               <label class="form-label-xs">Pack Size</label>
               <select id="pFilterPackSize" class="form-select form-select-sm" onchange="applyPrimaryFilters()">
@@ -660,7 +667,7 @@
               <div class="dashboard-card p-3">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <h6 class="fw-bold text-dark mb-0">
-                    <i class="fa-solid fa-layer-group text-info me-2"></i>Product Segment Performance (FY 25-26 vs FY 26-27 in KL)
+                    <i class="fa-solid fa-layer-group text-info me-2"></i>Product Segment Performance (Column T: FY 25-26 vs FY 26-27 in KL)
                   </h6>
                 </div>
                 <div style="height: 250px; position: relative;">
@@ -1095,7 +1102,7 @@
     let allSecondaryStockists = [];
     let selectedSecondaryStockists = new Set();
 
-    const STORAGE_KEY_TARGETS = "SERVO_STOCKIST_PRIMARY_TARGETS_V6";
+    const STORAGE_KEY_TARGETS = "SERVO_STOCKIST_PRIMARY_TARGETS_V7";
     let stockistTargetStore = {};
 
     const DEFAULT_STOCKISTS = [
@@ -1157,7 +1164,7 @@
     }
 
     /* =========================================================
-       STOCKIST TARGET MANAGEMENT
+       STOCKIST TARGET MANAGEMENT & TARGET.XLSX UPLOAD
        ========================================================= */
     function initTargetStore() {
       const saved = localStorage.getItem(STORAGE_KEY_TARGETS);
@@ -1283,6 +1290,7 @@
       return targetKL;
     }
 
+    // Handles target.xlsx upload with AUTO-FILL TO 0 for any stockist not in the sheet
     function handleTargetFileUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -1300,33 +1308,43 @@
           }
 
           const validRows = rawRows.filter(r => r && r.some(c => c !== null && c !== undefined && c.toString().trim() !== ""));
-          const knownStockists = Object.keys(stockistTargetStore).concat(DEFAULT_STOCKISTS);
+          
+          // Gather all known stockists
+          const knownStockists = Array.from(new Set(
+            Object.keys(stockistTargetStore).concat(DEFAULT_STOCKISTS).concat(allPrimaryStockists)
+          ));
+
+          function normalizeName(name) {
+            return (name || "").toString().trim().replace(/\s+/g, ' ').toLowerCase();
+          }
 
           const firstColVals = validRows.map(r => (r[0] || "").toString().trim().toUpperCase().substring(0, 3));
           const monthHitsInCol0 = firstColVals.filter(v => MONTH_ORDER.includes(v)).length;
 
-          let importedCount = 0;
+          const updatedStockistsInFile = new Set();
 
           if (monthHitsInCol0 >= 4) {
+            // FORMAT A (attached target.xlsx): Months in Col 0, Stockists across headers in Row 0
             const headerRow = validRows[0];
             const colToStockist = {};
 
             for (let c = 1; c < headerRow.length; c++) {
               const val = (headerRow[c] || "").toString().trim();
               if (val && val.toLowerCase() !== "target") {
+                const normVal = normalizeName(val);
                 let matched = val;
                 for (const ks of knownStockists) {
-                  if (ks.toLowerCase() === val.toLowerCase()) {
+                  if (normalizeName(ks) === normVal) {
                     matched = ks;
                     break;
                   }
                 }
                 colToStockist[c] = matched;
+                updatedStockistsInFile.add(matched);
                 if (!stockistTargetStore[matched]) {
                   stockistTargetStore[matched] = {};
                   MONTH_ORDER.forEach(m => stockistTargetStore[matched][m] = 0);
                 }
-                importedCount++;
               }
             }
 
@@ -1337,27 +1355,28 @@
               if (MONTH_ORDER.includes(mStr)) {
                 for (const [colIdx, stkName] of Object.entries(colToStockist)) {
                   const cellVal = parseFloat(row[colIdx]);
-                  if (!isNaN(cellVal)) {
-                    stockistTargetStore[stkName][mStr] = cellVal;
-                  }
+                  stockistTargetStore[stkName][mStr] = isNaN(cellVal) ? 0 : cellVal;
                 }
               }
             }
           } else {
+            // FORMAT B: Horizontal format
             const headerRow = validRows[0].map(c => (c || "").toString().trim().toUpperCase().substring(0, 3));
             for (let r = 1; r < validRows.length; r++) {
               const row = validRows[r];
               const stkRaw = (row[0] || "").toString().trim();
               if (!stkRaw || stkRaw.toUpperCase() === "TOTAL") continue;
 
+              const normVal = normalizeName(stkRaw);
               let matched = stkRaw;
               for (const ks of knownStockists) {
-                if (ks.toLowerCase() === stkRaw.toLowerCase()) {
+                if (normalizeName(ks) === normVal) {
                   matched = ks;
                   break;
                 }
               }
 
+              updatedStockistsInFile.add(matched);
               if (!stockistTargetStore[matched]) {
                 stockistTargetStore[matched] = {};
                 MONTH_ORDER.forEach(m => stockistTargetStore[matched][m] = 0);
@@ -1367,19 +1386,28 @@
                 const mStr = headerRow[c];
                 if (MONTH_ORDER.includes(mStr)) {
                   const num = parseFloat(row[c]);
-                  if (!isNaN(num)) {
-                    stockistTargetStore[matched][mStr] = num;
-                  }
+                  stockistTargetStore[matched][mStr] = isNaN(num) ? 0 : num;
                 }
               }
-              importedCount++;
             }
           }
+
+          // AUTO-FILL TO 0: Any known stockist NOT present in the uploaded sheet has all months reset to 0
+          let zeroedCount = 0;
+          knownStockists.forEach(ks => {
+            if (!updatedStockistsInFile.has(ks)) {
+              if (!stockistTargetStore[ks]) stockistTargetStore[ks] = {};
+              MONTH_ORDER.forEach(m => {
+                stockistTargetStore[ks][m] = 0.0;
+              });
+              zeroedCount++;
+            }
+          });
 
           localStorage.setItem(STORAGE_KEY_TARGETS, JSON.stringify(stockistTargetStore));
           renderTargetManagementTable();
           applyPrimaryFilters();
-          showToast(`Successfully imported target figures for ${importedCount} stockists!`);
+          showToast(`Targets updated: ${updatedStockistsInFile.size} loaded from file, ${zeroedCount} missing stockists auto-set to 0.`);
         } catch (err) {
           showToast("Error parsing target file: " + err.message);
         }
@@ -1421,441 +1449,6 @@
       XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
       XLSX.writeFile(wb, "SERVO_Primary_Targets_Template.xlsx");
       showToast("Target template exported successfully!");
-    }
-
-    /* =========================================================
-       MULTI-STOCKIST & MULTI-MONTH UI BUILDERS
-       ========================================================= */
-    function initializeMultiStockistControls() {
-      allPrimaryStockists = [...new Set(primaryDataStore.map(d => d.Stockist))].filter(Boolean).sort();
-      selectedPrimaryStockists = new Set(allPrimaryStockists);
-
-      const pGrid = document.getElementById('pStockistCheckboxGrid');
-      if (pGrid) {
-        pGrid.innerHTML = '';
-        allPrimaryStockists.forEach(stk => {
-          const label = document.createElement('label');
-          label.className = 'checkbox-item-label';
-          label.innerHTML = `
-            <input type="checkbox" class="form-check-input mt-0 p-stk-check" value="${escapeHtml(stk)}" checked onchange="handlePrimaryStockistToggle('${escapeHtml(stk)}', this.checked)">
-            <span class="text-truncate">${escapeHtml(stk)}</span>
-          `;
-          pGrid.appendChild(label);
-        });
-      }
-      updatePrimaryStockistButtonLabel();
-
-      allSecondaryStockists = [...new Set(secondaryDataStore.map(d => d.Stockist))].filter(Boolean).sort();
-      selectedSecondaryStockists = new Set(allSecondaryStockists);
-
-      const sGrid = document.getElementById('sStockistCheckboxGrid');
-      if (sGrid) {
-        sGrid.innerHTML = '';
-        allSecondaryStockists.forEach(stk => {
-          const label = document.createElement('label');
-          label.className = 'checkbox-item-label';
-          label.innerHTML = `
-            <input type="checkbox" class="form-check-input mt-0 s-stk-check" value="${escapeHtml(stk)}" checked onchange="handleSecondaryStockistToggle('${escapeHtml(stk)}', this.checked)">
-            <span class="text-truncate">${escapeHtml(stk)}</span>
-          `;
-          sGrid.appendChild(label);
-        });
-      }
-      updateSecondaryStockistButtonLabel();
-    }
-
-    function handlePrimaryStockistToggle(stk, isChecked) {
-      if (isChecked) selectedPrimaryStockists.add(stk);
-      else selectedPrimaryStockists.delete(stk);
-      updatePrimaryStockistButtonLabel();
-      applyPrimaryFilters();
-    }
-
-    function setPrimaryStockists(selectAll) {
-      if (selectAll) selectedPrimaryStockists = new Set(allPrimaryStockists);
-      else selectedPrimaryStockists.clear();
-
-      document.querySelectorAll('.p-stk-check').forEach(cb => {
-        cb.checked = selectAll;
-      });
-      updatePrimaryStockistButtonLabel();
-      applyPrimaryFilters();
-    }
-
-    function updatePrimaryStockistButtonLabel() {
-      const count = selectedPrimaryStockists.size;
-      const total = allPrimaryStockists.length;
-      let label = 'All Stockists';
-      if (count === 0) label = 'No Stockist Selected';
-      else if (count === 1) label = Array.from(selectedPrimaryStockists)[0];
-      else if (count < total) label = `${count} Stockists Selected`;
-      setText('pStockistSelectedLabel', label);
-    }
-
-    function handleSecondaryStockistToggle(stk, isChecked) {
-      if (isChecked) selectedSecondaryStockists.add(stk);
-      else selectedSecondaryStockists.delete(stk);
-      updateSecondaryStockistButtonLabel();
-      applySecondaryFilters();
-    }
-
-    function setSecondaryStockists(selectAll) {
-      if (selectAll) selectedSecondaryStockists = new Set(allSecondaryStockists);
-      else selectedSecondaryStockists.clear();
-
-      document.querySelectorAll('.s-stk-check').forEach(cb => {
-        cb.checked = selectAll;
-      });
-      updateSecondaryStockistButtonLabel();
-      applySecondaryFilters();
-    }
-
-    function updateSecondaryStockistButtonLabel() {
-      const count = selectedSecondaryStockists.size;
-      const total = allSecondaryStockists.length;
-      let label = 'All Stockists';
-      if (count === 0) label = 'No Stockist Selected';
-      else if (count === 1) label = Array.from(selectedSecondaryStockists)[0];
-      else if (count < total) label = `${count} Stockists Selected`;
-      setText('sStockistSelectedLabel', label);
-    }
-
-    function initializeMonthDropdowns() {
-      const pGrid = document.getElementById('pMonthCheckboxGrid');
-      if (pGrid) {
-        pGrid.innerHTML = '';
-        MONTH_ORDER.forEach(m => {
-          const label = document.createElement('label');
-          label.className = 'month-checkbox-label';
-          label.innerHTML = `
-            <input type="checkbox" class="form-check-input mt-0 p-month-check" value="${m}" checked onchange="handlePrimaryMonthToggle('${m}', this.checked)">
-            <span>${m}</span>
-          `;
-          pGrid.appendChild(label);
-        });
-      }
-
-      const sGrid = document.getElementById('sMonthCheckboxGrid');
-      if (sGrid) {
-        sGrid.innerHTML = '';
-        MONTH_ORDER.forEach(m => {
-          const label = document.createElement('label');
-          label.className = 'month-checkbox-label';
-          label.innerHTML = `
-            <input type="checkbox" class="form-check-input mt-0 s-month-check" value="${m}" checked onchange="handleSecondaryMonthToggle('${m}', this.checked)">
-            <span>${m}</span>
-          `;
-          sGrid.appendChild(label);
-        });
-      }
-
-      updatePrimaryMonthButtonLabel();
-      updateSecondaryMonthButtonLabel();
-    }
-
-    function handlePrimaryMonthToggle(m, isChecked) {
-      if (isChecked) selectedPrimaryMonths.add(m);
-      else selectedPrimaryMonths.delete(m);
-      updatePrimaryMonthButtonLabel();
-      applyPrimaryFilters();
-    }
-
-    function setPrimaryMonths(selectAll) {
-      if (selectAll) selectedPrimaryMonths = new Set([...MONTH_ORDER]);
-      else selectedPrimaryMonths.clear();
-      
-      document.querySelectorAll('.p-month-check').forEach(cb => {
-        cb.checked = selectAll;
-      });
-      updatePrimaryMonthButtonLabel();
-      applyPrimaryFilters();
-    }
-
-    function updatePrimaryMonthButtonLabel() {
-      const count = selectedPrimaryMonths.size;
-      let label = 'All Months (12)';
-      if (count === 0) label = 'No Month Selected';
-      else if (count <= 3) label = Array.from(selectedPrimaryMonths).sort((a,b) => MONTH_ORDER.indexOf(a) - MONTH_ORDER.indexOf(b)).join(', ');
-      else if (count < 12) label = `${count} Months Selected`;
-      setText('pMonthSelectedLabel', label);
-    }
-
-    function handleSecondaryMonthToggle(m, isChecked) {
-      if (isChecked) selectedSecondaryMonths.add(m);
-      else selectedSecondaryMonths.delete(m);
-      updateSecondaryMonthButtonLabel();
-      applySecondaryFilters();
-    }
-
-    function setSecondaryMonths(selectAll) {
-      if (selectAll) selectedSecondaryMonths = new Set([...MONTH_ORDER]);
-      else selectedSecondaryMonths.clear();
-
-      document.querySelectorAll('.s-month-check').forEach(cb => {
-        cb.checked = selectAll;
-      });
-      updateSecondaryMonthButtonLabel();
-      applySecondaryFilters();
-    }
-
-    function updateSecondaryMonthButtonLabel() {
-      const count = selectedSecondaryMonths.size;
-      let label = 'All Months (12)';
-      if (count === 0) label = 'No Month Selected';
-      else if (count <= 3) label = Array.from(selectedSecondaryMonths).sort((a,b) => MONTH_ORDER.indexOf(a) - MONTH_ORDER.indexOf(b)).join(', ');
-      else if (count < 12) label = `${count} Months Selected`;
-      setText('sMonthSelectedLabel', label);
-    }
-
-    /* =========================================================
-       ROBUST GOOGLE SHEETS FETCHER
-       ========================================================= */
-    async function fetchSheetData(sheetName) {
-      const gid = SHEET_GIDS[sheetName];
-      if (!gid) throw new Error(`Unknown sheet ${sheetName}`);
-
-      const directCsvUrl = `https://docs.google.com/spreadsheets/d/${GOOGLE_SPREADSHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}`;
-      const proxyCsvUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(directCsvUrl)}`;
-
-      // 1. Try Direct CSV fetch
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 7000);
-        const res = await fetch(directCsvUrl, { signal: controller.signal });
-        clearTimeout(timeoutId);
-        if (res.ok) {
-          const text = await res.text();
-          if (text && !text.trim().startsWith('<!DOCTYPE') && !text.trim().startsWith('<html')) {
-            const wb = XLSX.read(text, { type: 'string' });
-            return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: "" });
-          }
-        }
-      } catch (e) {}
-
-      // 2. Try JSONP (Script Injection)
-      try {
-        return await new Promise((resolve, reject) => {
-          const callbackName = 'gviz_cb_' + Math.random().toString(36).substring(2, 9);
-          const script = document.createElement('script');
-          const timer = setTimeout(() => {
-            cleanup();
-            reject(new Error(`Timeout on ${sheetName}`));
-          }, 15000);
-
-          function cleanup() {
-            clearTimeout(timer);
-            if (window[callbackName]) delete window[callbackName];
-            if (script.parentNode) script.parentNode.removeChild(script);
-          }
-
-          window[callbackName] = function(json) {
-            cleanup();
-            if (!json || !json.table) return reject(new Error('Invalid structure'));
-            const table = json.table;
-            const headers = table.cols.map(c => (c && c.label) ? c.label.trim() : "");
-            const records = [];
-            table.rows.forEach(r => {
-              if (!r || !r.c) return;
-              const rowObj = {};
-              let hasData = false;
-              r.c.forEach((cell, idx) => {
-                const headerKey = headers[idx] || `col_${idx}`;
-                const cellVal = cell ? (cell.v !== null && cell.v !== undefined ? cell.v : (cell.f || "")) : "";
-                rowObj[headerKey] = cellVal;
-                if (cellVal !== "") hasData = true;
-              });
-              if (hasData) records.push(rowObj);
-            });
-            resolve(records);
-          };
-
-          script.onerror = () => { cleanup(); reject(new Error('JSONP load error')); };
-          script.src = `https://docs.google.com/spreadsheets/d/${GOOGLE_SPREADSHEET_ID}/gviz/tq?tqx=responseHandler:${callbackName}&gid=${gid}`;
-          document.body.appendChild(script);
-        });
-      } catch (e) {}
-
-      // 3. Try CORS Proxy
-      try {
-        const res = await fetch(proxyCsvUrl);
-        if (res.ok) {
-          const text = await res.text();
-          if (text && !text.trim().startsWith('<!DOCTYPE') && !text.trim().startsWith('<html')) {
-            const wb = XLSX.read(text, { type: 'string' });
-            return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: "" });
-          }
-        }
-      } catch (e) {}
-
-      throw new Error(`Unable to sync ${sheetName}. Please verify internet or upload file.`);
-    }
-
-    async function fetchLiveGoogleSheetData(showToastAlert = false) {
-      const syncIcon = document.getElementById('syncIcon');
-      if (syncIcon) syncIcon.classList.add('fa-spin');
-
-      setHTML('dataStatusBadge', '<i class="fa-solid fa-spinner fa-spin me-1"></i> Syncing sheets...');
-      const badgeEl = document.getElementById('dataStatusBadge');
-      if (badgeEl) badgeEl.className = 'badge bg-warning-subtle text-dark border border-warning-subtle px-2 py-1';
-
-      try {
-        const results = await Promise.allSettled([
-          fetchSheetData('P_FY 25-26'),
-          fetchSheetData('P_FY 26-27'),
-          fetchSheetData('S_FY 25-26'),
-          fetchSheetData('S_FY 26-27')
-        ]);
-
-        const p2526 = results[0].status === 'fulfilled' ? results[0].value : [];
-        const p2627 = results[1].status === 'fulfilled' ? results[1].value : [];
-        const s2526 = results[2].status === 'fulfilled' ? results[2].value : [];
-        const s2627 = results[3].status === 'fulfilled' ? results[3].value : [];
-
-        if (p2526.length === 0 && p2627.length === 0 && s2526.length === 0 && s2627.length === 0) {
-          throw new Error("Could not retrieve sheets from Google. You can manually drag & drop your Excel file.");
-        }
-
-        const parsedPrimary = [];
-        const parsedSecondary = [];
-
-        // Primary Sheets
-        const processPrimaryRow = (row, fy) => {
-          const rawStk = row['Stockist Name'] || row['Name'] || row['SSR NAME'] || row['CUSTOMER NAME'] || "Unknown Stockist";
-          const rawMonth = row['Month'] || row['BILLING MONTH'];
-          const seg = (row['SEGMENTATION'] || row['Segment'] || row['PRODUCT CATEGORY'] || "DEO").toString().trim();
-          
-          const colS = (row['Category'] || row['Categorisation'] || row['Premium'] || "MASS").toString().trim().toUpperCase();
-          const prodSegment = (row['Product segment 26-27'] || row['Product Segment'] || seg).toString().trim();
-
-          const psize = (row['PackSize'] || row['PACK SIZE'] || "210 L").toString().trim();
-          const qty = parseFloat(row['Invoiced Quantity'] || row['Billing qty in SKU'] || row['Qty'] || 1);
-          const kl = parseFloat(row['KL'] || row['VOL IN KL'] || row['Volume (KL)'] || (qty * 0.05));
-
-          parsedPrimary.push({
-            FY: fy,
-            Month: normalizeMonth(rawMonth),
-            Stockist: rawStk.toString().trim(),
-            Segment: seg,
-            ProductSegment: prodSegment || "OTHER",
-            ProductName: (row['Description'] || row['Material'] || "SERVO Lube").toString().trim(),
-            CategoryColS: colS || "MASS",
-            Premium: colS.includes('PREM') ? 'PREMIUM' : (colS.includes('ASPIR') ? 'ASPIRATIONAL' : 'MASS'),
-            PackSize: psize,
-            Assorted: (row['4T/ Assorted'] || (seg.includes('4T') ? '4T' : 'ASSORTED')).toString().trim(),
-            quantity: isNaN(qty) ? 1 : qty,
-            volumeKL: isNaN(kl) ? 0 : kl
-          });
-        };
-
-        if (p2526.length > 0) p2526.forEach(r => processPrimaryRow(r, 'FY 25-26'));
-        if (p2627.length > 0) p2627.forEach(r => processPrimaryRow(r, 'FY 26-27'));
-
-        // Secondary Sheets: Combine BAZAAR + SERVOXPERT together everywhere
-        const processSecondaryRow = (row, fy) => {
-          const rawStk = row['Stockist Name'] || row['Stockist'] || row['PARENT STOCKIST'] || "Unknown Stockist";
-          const rawCust = row['Customer Name'] || row['Customer'] || row['COUNTER NAME'] || "Retail Counter";
-          const rawGrp = (row['Customer Group'] || row['Group'] || row['CHANNEL'] || "Dealer").toString().trim();
-          const ssf = (row['SSF Name'] || row['SSF'] || row['FSO'] || "Representative").toString().trim();
-          const rawMonth = row['Month'] || row['BILLING MONTH'];
-
-          const prodSegment = (row['Product segment 26-27'] || row['Product Segment'] || row['Product Group'] || row['Trade Category'] || "OTHER").toString().trim();
-
-          let grpNorm = rawGrp;
-          if (rawGrp.toLowerCase() === 'dealer') {
-            grpNorm = 'Dealer';
-          } else if (rawGrp.toUpperCase() === 'BAZAAR' || rawGrp.toUpperCase() === 'SERVOXPERT' || rawGrp.toUpperCase().includes('BAZAAR') || rawGrp.toUpperCase().includes('SERVOXPERT')) {
-            grpNorm = 'BAZAAR + SERVOXPERT';
-          } else if (rawGrp.toUpperCase() === 'FLEET') {
-            grpNorm = 'FLEET';
-          } else if (rawGrp.toUpperCase() === 'OEM') {
-            grpNorm = 'OEM';
-          }
-
-          const volLtr = parseFloat(row['Product Quantity(L/Kg)'] || row['Base UOM Qty(L/Kg)'] || row['TOTAL VOLUME (L/KG)'] || 0);
-          const volKL = volLtr > 0 ? (volLtr / 1000) : parseFloat(row['VOL IN KL'] || 0.05);
-
-          parsedSecondary.push({
-            FY: fy,
-            Month: normalizeMonth(rawMonth),
-            Stockist: rawStk.toString().trim(),
-            CustomerName: rawCust.toString().trim(),
-            CustomerGroup: grpNorm,
-            ProductSegment: prodSegment || "OTHER",
-            SSF: ssf,
-            Segment: (row['Trade Category'] || row['Product Group'] || "Commercial Lube").toString().trim(),
-            ProductName: (row['Product Name'] || row['SKU Name'] || "SERVO Grade").toString().trim(),
-            volumeKL: isNaN(volKL) ? 0 : volKL
-          });
-        };
-
-        if (s2526.length > 0) s2526.forEach(r => processSecondaryRow(r, 'FY 25-26'));
-        if (s2627.length > 0) s2627.forEach(r => processSecondaryRow(r, 'FY 26-27'));
-
-        if (parsedPrimary.length > 0) primaryDataStore = parsedPrimary;
-        if (parsedSecondary.length > 0) secondaryDataStore = parsedSecondary;
-
-        const fetchedStks = [...new Set(primaryDataStore.map(d => d.Stockist))];
-        fetchedStks.forEach(stk => {
-          if (!stockistTargetStore[stk]) {
-            stockistTargetStore[stk] = {};
-            MONTH_ORDER.forEach(m => {
-              stockistTargetStore[stk][m] = 25.0;
-            });
-          }
-        });
-        renderTargetManagementTable();
-
-        initializeMultiStockistControls();
-        populateFilterOptions();
-        applyPrimaryFilters();
-        applySecondaryFilters();
-
-        setHTML('dataStatusBadge', `<i class="fa-solid fa-circle-check me-1"></i> Live Sheets Connected (P: ${parsedPrimary.length} | S: ${parsedSecondary.length})`);
-        if (badgeEl) badgeEl.className = 'badge bg-success-subtle text-success border border-success-subtle px-2 py-1';
-
-        if (showToastAlert) {
-          showToast(`Synced: ${parsedPrimary.length} Primary rows & ${parsedSecondary.length} Secondary rows!`);
-        }
-      } catch (err) {
-        console.error("Error loading Google Sheet data:", err);
-        setHTML('dataStatusBadge', '<i class="fa-solid fa-triangle-exclamation me-1"></i> Connection Error');
-        if (badgeEl) badgeEl.className = 'badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1';
-        showToast("Error connecting to Google Sheet: " + err.message);
-      } finally {
-        if (syncIcon) syncIcon.classList.remove('fa-spin');
-      }
-    }
-
-    /* =========================================================
-       FILTER DROPDOWNS SETUP
-       ========================================================= */
-    function populateFilterOptions() {
-      populateSelect('pFilterSegment', [...new Set(primaryDataStore.map(d => d.Segment))]);
-      populateSelect('pFilterProdSegment', [...new Set(primaryDataStore.map(d => d.ProductSegment))]);
-      populateSelect('pFilterPremium', [...new Set(primaryDataStore.map(d => d.CategoryColS))]);
-      populateSelect('pFilterPackSize', [...new Set(primaryDataStore.map(d => d.PackSize))]);
-
-      populateSelect('sFilterChannel', [...new Set(secondaryDataStore.map(d => d.CustomerGroup))]);
-      populateSelect('sFilterProdSegment', [...new Set(secondaryDataStore.map(d => d.ProductSegment))]);
-      populateSelect('sFilterSSF', [...new Set(secondaryDataStore.map(d => d.SSF))]);
-    }
-
-    function populateSelect(elemId, uniqueValues) {
-      const select = document.getElementById(elemId);
-      if (!select) return;
-      const currentVal = select.value;
-      const firstOpt = select.options[0]?.text || "All";
-      
-      select.innerHTML = `<option value="ALL">${firstOpt}</option>`;
-      uniqueValues.filter(Boolean).sort().forEach(val => {
-        const opt = document.createElement('option');
-        opt.value = val;
-        opt.textContent = val;
-        select.appendChild(opt);
-      });
-      if (uniqueValues.includes(currentVal)) {
-        select.value = currentVal;
-      }
     }
 
     /* =========================================================
@@ -1931,7 +1524,6 @@
       const totalKL = filteredPrimaryData.reduce((acc, c) => acc + (c.volumeKL || 0), 0);
       const premRatio = totalKL > 0 ? ((premKL / totalKL) * 100) : 0;
 
-      // Major Segment from Product Segment Performance (Column T)
       const prodSegData = getBreakdownData(selectedFY);
       const prodSegMap = {};
       let totalProdSegKL = 0;
@@ -2050,6 +1642,7 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          animation: false,
           scales: {
             y: { 
               title: { display: true, text: 'Volume (KL)' },
@@ -2123,6 +1716,7 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          animation: false,
           scales: {
             x: { stacked: primaryChartType === 'bar' },
             y: { 
@@ -2178,6 +1772,7 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          animation: false,
           plugins: {
             legend: { position: 'right' },
             tooltip: {
@@ -2232,6 +1827,7 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          animation: false,
           plugins: { 
             legend: { position: 'right' },
             tooltip: {
@@ -2292,6 +1888,7 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          animation: false,
           plugins: {
             legend: { position: 'top' },
             tooltip: { 
@@ -2310,6 +1907,100 @@
           }
         }
       });
+    }
+
+    /* =========================================================
+       HIGH-FIDELITY PDF AND IMAGE EXPORT CAPABILITIES
+       Captures exactly from below the filter bar (KPI + Charts)
+       ========================================================= */
+    async function captureElementCanvas(element) {
+      const originalCanvases = element.querySelectorAll('canvas');
+
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        onclone: (clonedDoc) => {
+          // Copy live canvas pixels from original document to cloned canvases
+          const clonedCanvases = clonedDoc.querySelectorAll('canvas');
+          originalCanvases.forEach((orig, idx) => {
+            const dest = clonedCanvases[idx];
+            if (dest && orig.width > 0 && orig.height > 0) {
+              dest.width = orig.width;
+              dest.height = orig.height;
+              const destCtx = dest.getContext('2d');
+              destCtx.drawImage(orig, 0, 0);
+            }
+          });
+        }
+      });
+
+      return canvas;
+    }
+
+    async function exportActiveTabAsImage(tabName) {
+      showToast(`Generating ${tabName} Analytics Image...`);
+      const target = document.getElementById(tabName === 'Primary' ? 'primaryExportCaptureArea' : 'secondaryExportCaptureArea');
+      if (!target) return;
+
+      try {
+        const canvas = await captureElementCanvas(target);
+        canvas.toBlob((blob) => {
+          if (!blob) throw new Error("Canvas rasterization returned empty blob");
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.download = `SERVO_${tabName}_Analytics_${new Date().toISOString().slice(0,10)}.jpg`;
+          link.href = url;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+          showToast(`${tabName} Analytics image downloaded successfully!`);
+        }, 'image/jpeg', 0.95);
+      } catch (err) {
+        showToast("Error generating image: " + err.message);
+      }
+    }
+
+    async function exportActiveTabAsPDF(tabName) {
+      showToast(`Generating ${tabName} Analytics PDF...`);
+      const target = document.getElementById(tabName === 'Primary' ? 'primaryExportCaptureArea' : 'secondaryExportCaptureArea');
+      if (!target) return;
+
+      try {
+        const canvas = await captureElementCanvas(target);
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        
+        const jsPDFConstructor = window.jspdf ? (window.jspdf.jsPDF || window.jspdf) : window.jsPDF;
+        if (!jsPDFConstructor) {
+          throw new Error("jsPDF library not loaded");
+        }
+
+        const pdf = new jsPDFConstructor('landscape', 'pt', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        let heightLeft = pdfHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, pdfHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft > 0) {
+          position = heightLeft - pdfHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, pdfHeight);
+          heightLeft -= pageHeight;
+        }
+
+        pdf.save(`SERVO_${tabName}_Analytics_${new Date().toISOString().slice(0,10)}.pdf`);
+        showToast(`${tabName} Analytics PDF downloaded successfully!`);
+      } catch (err) {
+        showToast("Error generating PDF: " + err.message);
+      }
     }
 
     /* =========================================================
@@ -2369,19 +2060,19 @@
       const diffKL = volFY26 - volFY25;
       const diffPct = volFY25 > 0 ? ((diffKL / volFY25) * 100) : 0;
 
-      // 1. Active Dealers & Volume (CustomerGroup: Dealer) STRICTLY OF CURRENT FY (FY 26-27)
+      // Active Dealers & Volume (CustomerGroup: Dealer) STRICTLY OF CURRENT FY (FY 26-27)
       const currentFYSecondary = baseForComparison.filter(d => d.FY === 'FY 26-27');
       
       const dealerRecords = currentFYSecondary.filter(d => d.CustomerGroup === 'Dealer');
       const dealerCustomers = new Set(dealerRecords.map(d => d.CustomerName));
       const dealerVolKL = dealerRecords.reduce((acc, c) => acc + (c.volumeKL || 0), 0);
 
-      // 2. Bazaar + SERVOXPERT for Current FY (FY 26-27)
+      // Bazaar + SERVOXPERT for Current FY (FY 26-27)
       const bazaarRecordsFY26 = currentFYSecondary.filter(d => d.CustomerGroup === 'BAZAAR + SERVOXPERT');
       const countFY26 = new Set(bazaarRecordsFY26.map(d => d.CustomerName)).size;
       const bazaarVolKL = bazaarRecordsFY26.reduce((acc, c) => acc + (c.volumeKL || 0), 0);
 
-      // 3. Bazaar + SERVOXPERT for FY 25-26 (ENTIRE 12 MONTHS OF THE YEAR)
+      // Bazaar + SERVOXPERT for FY 25-26 (ENTIRE 12 MONTHS OF THE YEAR)
       const bazaarRecordsFY25Full = secondaryDataStore.filter(d => {
         if (d.FY !== 'FY 25-26') return false;
         if (!selectedSecondaryStockists.has(d.Stockist)) return false;
@@ -2392,7 +2083,6 @@
       });
       const countFY25Full = new Set(bazaarRecordsFY25Full.map(d => d.CustomerName)).size;
 
-      // Calculate YoY Counter Difference (FY 26-27 vs Full FY 25-26)
       const custDiff = countFY26 - countFY25Full;
       const custDiffPct = countFY25Full > 0 ? ((custDiff / countFY25Full) * 100) : 0;
       const diffSign = custDiff >= 0 ? '+' : '';
@@ -2412,7 +2102,6 @@
       setText('kpiSecActiveDealers', dealerCustomers.size.toLocaleString('en-IN'));
       setText('kpiSecDealerVol', `${formatVol(dealerVolKL)} KL`);
 
-      // Set YoY Counter Comparison
       setText('kpiSecBazaarCust', countFY26.toLocaleString('en-IN'));
       setText('kpiSecBazaarCustFY25', countFY25Full.toLocaleString('en-IN'));
       setHTML('kpiSecBazaarCustDiff', `<span class="${diffColorClass}">${diffSign}${custDiff.toLocaleString('en-IN')} (${diffSign}${custDiffPct.toFixed(1)}%)</span>`);
@@ -2467,6 +2156,7 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          animation: false,
           scales: {
             y: { 
               title: { display: true, text: 'Volume (KL)' },
@@ -2510,12 +2200,13 @@
           labels: labels.map((l, i) => `${l} (${percentages[i]}%)`),
           datasets: [{
             data: data,
-            backgroundColor: ['#002b49', '#ff6600', '#10b981', '#f59e0b', '#64748b', '#8b5cf6']
+            backgroundColor: ['#002b49', '#ff6600', '#10b981', '#f59e0b', '#64748b']
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          animation: false,
           plugins: { 
             legend: { position: 'right' },
             tooltip: {
@@ -2576,6 +2267,7 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          animation: false,
           plugins: {
             legend: { position: 'top' },
             tooltip: { 
@@ -2641,6 +2333,7 @@
           indexAxis: 'y',
           responsive: true,
           maintainAspectRatio: false,
+          animation: false,
           plugins: {
             legend: { position: 'top' },
             tooltip: { 
@@ -2759,7 +2452,7 @@
     }
 
     /* =========================================================
-       FILE UPLOAD HANDLERS (FALLBACK)
+       FILE UPLOAD HANDLERS (PRIMARY & SECONDARY)
        ========================================================= */
     function handlePrimaryFileUpload(event) {
       const file = event.target.files[0];

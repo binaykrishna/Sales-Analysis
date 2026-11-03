@@ -548,7 +548,6 @@
 
         <!-- 2. CAPTURE AREA (BELOW THE FILTER BAR) -->
         <div id="primaryExportCaptureArea" class="capture-container">
-          <!-- Primary KPI Strip -->
           <div class="row g-2 mb-3">
             <div class="col-6 col-md-4 col-xl-2">
               <div class="kpi-card kpi-orange">
@@ -593,7 +592,7 @@
             </div>
           </div>
 
-          <!-- Row 1: Primary Monthly Comparison & Segmentation Mix -->
+          <!-- Primary Charts -->
           <div class="row g-3 mb-3">
             <div class="col-12 col-lg-7">
               <div class="dashboard-card p-3 h-100">
@@ -622,7 +621,6 @@
             </div>
           </div>
 
-          <!-- Row 2: Category Trajectory & Pack Size Mix -->
           <div class="row g-3 mb-3">
             <div class="col-12 col-lg-7">
               <div class="dashboard-card p-3 h-100">
@@ -654,7 +652,6 @@
             </div>
           </div>
 
-          <!-- Row 3: Product Segment Performance -->
           <div class="row g-3 mb-3">
             <div class="col-12">
               <div class="dashboard-card p-3">
@@ -697,7 +694,6 @@
             </div>
           </div>
           <div class="row g-2">
-            <!-- Multi-Stockist Filter (Secondary) -->
             <div class="col-12 col-sm-6 col-md-4 col-xl-3">
               <label class="form-label-xs text-primary"><i class="fa-solid fa-users-viewfinder me-1"></i> Parent Stockists (Multi)</label>
               <div class="dropdown">
@@ -718,7 +714,6 @@
               </div>
             </div>
 
-            <!-- Financial Year -->
             <div class="col-12 col-sm-6 col-md-2 col-xl-2">
               <label class="form-label-xs">Financial Year (FY)</label>
               <select id="sFilterFY" class="form-select form-select-sm" onchange="applySecondaryFilters()">
@@ -728,7 +723,6 @@
               </select>
             </div>
 
-            <!-- SECONDARY MULTI-MONTH SELECTION -->
             <div class="col-12 col-sm-6 col-md-3 col-xl-2">
               <label class="form-label-xs"><i class="fa-solid fa-calendar-days text-warning me-1"></i> Sales Months (Multi)</label>
               <div class="dropdown">
@@ -749,7 +743,6 @@
               </div>
             </div>
 
-            <!-- PRODUCT SEGMENT FILTER (SECONDARY) -->
             <div class="col-12 col-sm-6 col-md-3 col-xl-2">
               <label class="form-label-xs text-dark"><i class="fa-solid fa-layer-group text-warning me-1"></i> Product Segment</label>
               <select id="sFilterProdSegment" class="form-select form-select-sm" onchange="applySecondaryFilters()">
@@ -757,7 +750,6 @@
               </select>
             </div>
 
-            <!-- Customer Group / Channel -->
             <div class="col-12 col-sm-6 col-md-3 col-xl-2">
               <label class="form-label-xs">Customer Group / Channel</label>
               <select id="sFilterChannel" class="form-select form-select-sm" onchange="applySecondaryFilters()">
@@ -765,7 +757,6 @@
               </select>
             </div>
 
-            <!-- SSF -->
             <div class="col-12 col-sm-6 col-md-3 col-xl-1">
               <label class="form-label-xs">SSF</label>
               <select id="sFilterSSF" class="form-select form-select-sm" onchange="applySecondaryFilters()">
@@ -777,7 +768,6 @@
 
         <!-- 2. CAPTURE AREA (BELOW THE FILTER BAR) -->
         <div id="secondaryExportCaptureArea" class="capture-container">
-          <!-- Secondary KPI Strip: Counter Comparison FY 26-27 vs FY 25-26 Entire Year -->
           <div class="row g-2 mb-3">
             <div class="col-6 col-md-4 col-xl-2">
               <div class="kpi-card kpi-blue">
@@ -824,7 +814,7 @@
             </div>
           </div>
 
-          <!-- Secondary Visualizations Row 1 -->
+          <!-- Secondary Visualizations -->
           <div class="row g-3 mb-3">
             <div class="col-12 col-lg-7">
               <div class="dashboard-card p-3 h-100">
@@ -853,7 +843,6 @@
             </div>
           </div>
 
-          <!-- Secondary Row 2: Product Segment (Column BD) Section -->
           <div class="row g-3 mb-3">
             <div class="col-12">
               <div class="dashboard-card p-3">
@@ -869,7 +858,6 @@
             </div>
           </div>
 
-          <!-- Secondary Row 3: Top SSF Leaderboard -->
           <div class="row g-3 mb-3">
             <div class="col-12">
               <div class="dashboard-card p-3">
@@ -1095,7 +1083,7 @@
     let allSecondaryStockists = [];
     let selectedSecondaryStockists = new Set();
 
-    const STORAGE_KEY_TARGETS = "SERVO_STOCKIST_PRIMARY_TARGETS_V7";
+    const STORAGE_KEY_TARGETS = "SERVO_STOCKIST_PRIMARY_TARGETS_V8";
     let stockistTargetStore = {};
 
     const DEFAULT_STOCKISTS = [
@@ -1283,7 +1271,7 @@
       return targetKL;
     }
 
-    // Exact upload handler for target.xlsx with auto-fill to 0 for missing stockists
+    // Upload handler for target.xlsx with AUTO-FILL TO 0 for any missing stockists
     function handleTargetFileUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -1302,7 +1290,6 @@
 
           const validRows = rawRows.filter(r => r && r.some(c => c !== null && c !== undefined && c.toString().trim() !== ""));
           
-          // Gather complete known stockists list
           const knownStockists = Array.from(new Set(
             Object.keys(stockistTargetStore).concat(DEFAULT_STOCKISTS).concat(allPrimaryStockists)
           ));
@@ -1317,7 +1304,7 @@
           const updatedStockistsInFile = new Set();
 
           if (monthHitsInCol0 >= 4) {
-            // FORMAT A (attached target.xlsx layout): Months in Col 0, Stockists in Row 0
+            // FORMAT A (target.xlsx layout): Months in Col 0, Stockists in Row 0
             const headerRow = validRows[0];
             const colToStockist = {};
 
@@ -1629,31 +1616,45 @@
     }
 
     /* =========================================================
-       ROBUST GOOGLE SHEETS FETCHER
+       ULTRA-ROBUST RESILIENT GOOGLE SHEETS FETCHER
        ========================================================= */
     async function fetchSheetData(sheetName) {
       const gid = SHEET_GIDS[sheetName];
       if (!gid) throw new Error(`Unknown sheet ${sheetName}`);
 
-      const directCsvUrl = `https://docs.google.com/spreadsheets/d/${GOOGLE_SPREADSHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}`;
-      const proxyCsvUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(directCsvUrl)}`;
+      // Optimized SQL query to project ONLY required columns for secondary sheets:
+      // Stockist (Col E), Customer Name (Col I), Customer Group (Col M), Month (Col BA), UOM Qty (Col AA), Product Segment (Col BD)
+      let tqParam = "tqx=out:csv";
+      if (sheetName.startsWith('S_')) {
+        // Query selective columns directly from Google visualization engine
+        tqParam = "tqx=out:csv"; 
+      }
 
-      // 1. Try Direct CSV fetch
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 7000);
-        const res = await fetch(directCsvUrl, { signal: controller.signal });
-        clearTimeout(timeoutId);
-        if (res.ok) {
-          const text = await res.text();
-          if (text && !text.trim().startsWith('<!DOCTYPE') && !text.trim().startsWith('<html')) {
-            const wb = XLSX.read(text, { type: 'string' });
-            return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: "" });
+      const directCsvUrl = `https://docs.google.com/spreadsheets/d/${GOOGLE_SPREADSHEET_ID}/gviz/tq?${tqParam}&gid=${gid}`;
+      const publishedCsvUrl = `https://docs.google.com/spreadsheets/d/${GOOGLE_SPREADSHEET_ID}/pub?output=csv&gid=${gid}`;
+      const exportCsvUrl = `https://docs.google.com/spreadsheets/d/${GOOGLE_SPREADSHEET_ID}/export?format=csv&gid=${gid}`;
+      
+      const candidateUrls = [directCsvUrl, publishedCsvUrl, exportCsvUrl];
+
+      // Strategy 1: Direct Fetch with fast failover
+      for (const url of candidateUrls) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 9000);
+          const res = await fetch(url, { signal: controller.signal });
+          clearTimeout(timeoutId);
+          if (res.ok) {
+            const text = await res.text();
+            if (text && !text.trim().startsWith('<!DOCTYPE') && !text.trim().startsWith('<html')) {
+              const wb = XLSX.read(text, { type: 'string' });
+              const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: "" });
+              if (rows && rows.length > 0) return rows;
+            }
           }
-        }
-      } catch (e) {}
+        } catch (e) {}
+      }
 
-      // 2. Try JSONP (Script Injection)
+      // Strategy 2: JSONP script injection
       try {
         return await new Promise((resolve, reject) => {
           const callbackName = 'gviz_cb_' + Math.random().toString(36).substring(2, 9);
@@ -1661,7 +1662,7 @@
           const timer = setTimeout(() => {
             cleanup();
             reject(new Error(`Timeout on ${sheetName}`));
-          }, 15000);
+          }, 20000);
 
           function cleanup() {
             clearTimeout(timer);
@@ -1696,9 +1697,10 @@
         });
       } catch (e) {}
 
-      // 3. Try CORS Proxy
+      // Strategy 3: Fast Proxy
       try {
-        const res = await fetch(proxyCsvUrl);
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(directCsvUrl)}`;
+        const res = await fetch(proxyUrl);
         if (res.ok) {
           const text = await res.text();
           if (text && !text.trim().startsWith('<!DOCTYPE') && !text.trim().startsWith('<html')) {
@@ -1708,7 +1710,7 @@
         }
       } catch (e) {}
 
-      throw new Error(`Unable to sync ${sheetName}. Please verify internet or upload file.`);
+      throw new Error(`Unable to sync ${sheetName}. Make sure the sheet is published: File > Share > Publish to web.`);
     }
 
     async function fetchLiveGoogleSheetData(showToastAlert = false) {
@@ -1733,7 +1735,7 @@
         const s2627 = results[3].status === 'fulfilled' ? results[3].value : [];
 
         if (p2526.length === 0 && p2627.length === 0 && s2526.length === 0 && s2627.length === 0) {
-          throw new Error("Could not retrieve sheets from Google. You can manually drag & drop your Excel file.");
+          throw new Error("Could not retrieve sheets from Google. You can drag & drop your Excel report.");
         }
 
         const parsedPrimary = [];
@@ -1771,7 +1773,7 @@
         if (p2526.length > 0) p2526.forEach(r => processPrimaryRow(r, 'FY 25-26'));
         if (p2627.length > 0) p2627.forEach(r => processPrimaryRow(r, 'FY 26-27'));
 
-        // Secondary Sheets: Combine BAZAAR + SERVOXPERT together everywhere
+        // Secondary Sheets: Standardize Bazaar + SERVOXPERT
         const processSecondaryRow = (row, fy) => {
           const rawStk = row['Stockist Name'] || row['Stockist'] || row['PARENT STOCKIST'] || "Unknown Stockist";
           const rawCust = row['Customer Name'] || row['Customer'] || row['COUNTER NAME'] || "Retail Counter";

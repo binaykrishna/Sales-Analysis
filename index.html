@@ -183,8 +183,8 @@
     }
 
     .multi-select-dropdown {
-      min-width: 270px;
-      max-height: 340px;
+      min-width: 250px;
+      max-height: 320px;
       overflow-y: auto;
       padding: 0.6rem;
     }
@@ -468,8 +468,8 @@
           </div>
           <div class="row g-2">
             <!-- Multi-Stockist Filter -->
-            <div class="col-12 col-sm-6 col-md-4 col-xl-3">
-              <label class="form-label-xs text-primary"><i class="fa-solid fa-users-viewfinder me-1"></i> Stockists (Multi-Select)</label>
+            <div class="col-12 col-sm-6 col-md-4 col-xl-2">
+              <label class="form-label-xs text-primary"><i class="fa-solid fa-users-viewfinder me-1"></i> Stockists (Multi)</label>
               <div class="dropdown">
                 <button class="btn btn-sm btn-outline-primary dropdown-toggle w-100 text-truncate text-start d-flex justify-content-between align-items-center fw-bold" 
                         type="button" id="pStockistDropdownBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
@@ -498,7 +498,7 @@
               </select>
             </div>
 
-            <!-- MULTI-MONTH SELECTION DROPDOWN -->
+            <!-- Billing Months -->
             <div class="col-12 col-sm-6 col-md-3 col-xl-2">
               <label class="form-label-xs"><i class="fa-solid fa-calendar-days text-primary me-1"></i> Billing Months (Multi)</label>
               <div class="dropdown">
@@ -519,36 +519,88 @@
               </div>
             </div>
 
-            <!-- PRODUCT SEGMENT FILTER -->
+            <!-- Product Segment (Multi-Select) -->
             <div class="col-12 col-sm-6 col-md-3 col-xl-2">
-              <label class="form-label-xs text-dark"><i class="fa-solid fa-layer-group text-primary me-1"></i> Product Segment</label>
-              <select id="pFilterProdSegment" class="form-select form-select-sm" onchange="applyPrimaryFilters()">
-                <option value="ALL">All Product Segments</option>
-              </select>
+              <label class="form-label-xs text-dark"><i class="fa-solid fa-layer-group text-primary me-1"></i> Product Segment (Multi)</label>
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline-primary dropdown-toggle w-100 text-truncate text-start d-flex justify-content-between align-items-center fw-bold" 
+                        type="button" id="pProdSegDropdownBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                  <span id="pProdSegSelectedLabel">All Product Segments</span>
+                </button>
+                <div class="dropdown-menu multi-select-dropdown shadow-lg border-0" aria-labelledby="pProdSegDropdownBtn">
+                  <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                    <span class="small fw-bold text-muted">Select Segments:</span>
+                    <div>
+                      <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none me-2 small" onclick="setPrimaryProdSegments(true)">All</button>
+                      <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none text-danger small" onclick="setPrimaryProdSegments(false)">Clear</button>
+                    </div>
+                  </div>
+                  <div class="multi-select-grid" id="pProdSegCheckboxGrid"></div>
+                </div>
+              </div>
             </div>
 
-            <!-- Segmentation / General -->
+            <!-- Segment (Multi-Select) -->
             <div class="col-12 col-sm-6 col-md-3 col-xl-1">
-              <label class="form-label-xs">Segment</label>
-              <select id="pFilterSegment" class="form-select form-select-sm" onchange="applyPrimaryFilters()">
-                <option value="ALL">All</option>
-              </select>
+              <label class="form-label-xs">Segment (Multi)</label>
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle w-100 text-truncate text-start d-flex justify-content-between align-items-center" 
+                        type="button" id="pSegmentDropdownBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                  <span id="pSegmentSelectedLabel">All</span>
+                </button>
+                <div class="dropdown-menu multi-select-dropdown shadow-lg border-0" aria-labelledby="pSegmentDropdownBtn">
+                  <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                    <span class="small fw-bold text-muted">Select Segment:</span>
+                    <div>
+                      <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none me-2 small" onclick="setPrimarySegments(true)">All</button>
+                      <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none text-danger small" onclick="setPrimarySegments(false)">Clear</button>
+                    </div>
+                  </div>
+                  <div class="multi-select-grid" id="pSegmentCheckboxGrid"></div>
+                </div>
+              </div>
             </div>
 
-            <!-- Category (Column S) -->
+            <!-- Category (Multi-Select) -->
             <div class="col-12 col-sm-6 col-md-3 col-xl-1">
-              <label class="form-label-xs">Category</label>
-              <select id="pFilterPremium" class="form-select form-select-sm" onchange="applyPrimaryFilters()">
-                <option value="ALL">All</option>
-              </select>
+              <label class="form-label-xs">Category (Multi)</label>
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle w-100 text-truncate text-start d-flex justify-content-between align-items-center" 
+                        type="button" id="pCategoryDropdownBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                  <span id="pCategorySelectedLabel">All</span>
+                </button>
+                <div class="dropdown-menu multi-select-dropdown shadow-lg border-0" aria-labelledby="pCategoryDropdownBtn">
+                  <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                    <span class="small fw-bold text-muted">Select Category:</span>
+                    <div>
+                      <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none me-2 small" onclick="setPrimaryCategories(true)">All</button>
+                      <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none text-danger small" onclick="setPrimaryCategories(false)">Clear</button>
+                    </div>
+                  </div>
+                  <div class="multi-select-grid" id="pCategoryCheckboxGrid"></div>
+                </div>
+              </div>
             </div>
 
-            <!-- Pack Size -->
+            <!-- Pack Size (Multi-Select) -->
             <div class="col-12 col-sm-6 col-md-3 col-xl-1">
-              <label class="form-label-xs">Pack Size</label>
-              <select id="pFilterPackSize" class="form-select form-select-sm" onchange="applyPrimaryFilters()">
-                <option value="ALL">All</option>
-              </select>
+              <label class="form-label-xs">Pack Size (Multi)</label>
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle w-100 text-truncate text-start d-flex justify-content-between align-items-center" 
+                        type="button" id="pPackSizeDropdownBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                  <span id="pPackSizeSelectedLabel">All</span>
+                </button>
+                <div class="dropdown-menu multi-select-dropdown shadow-lg border-0" aria-labelledby="pPackSizeDropdownBtn">
+                  <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                    <span class="small fw-bold text-muted">Select Pack Size:</span>
+                    <div>
+                      <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none me-2 small" onclick="setPrimaryPackSizes(true)">All</button>
+                      <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none text-danger small" onclick="setPrimaryPackSizes(false)">Clear</button>
+                    </div>
+                  </div>
+                  <div class="multi-select-grid" id="pPackSizeCheckboxGrid"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -617,13 +669,13 @@
             </div>
           </div>
 
-          <!-- Row 2: BOTH CHARTS SIDE BY SIDE (Segmentation Mix & Monthly Upliftment Distribution) -->
+          <!-- Row 2: BOTH CHARTS SIDE BY SIDE -->
           <div class="row g-3 mb-3">
             <div class="col-12 col-lg-6">
               <div class="dashboard-card p-3 h-100">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <h6 class="fw-bold text-dark mb-0">
-                    <i class="fa-solid fa-chart-pie text-warning me-2"></i>Segmentation Mix (Product segment 26-27)
+                    <i class="fa-solid fa-chart-pie text-warning me-2"></i>Segmentation Mix (Product segment)
                   </h6>
                   <span class="badge bg-light text-secondary border" id="primarySegFYBadge">FY 26-27 (Current)</span>
                 </div>
@@ -637,13 +689,14 @@
               <div class="dashboard-card p-3 h-100">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <h6 class="fw-bold text-dark mb-0">
-                    <i class="fa-solid fa-clock-rotate-left text-primary me-2"></i>Monthly Upliftment Distribution (1-15th, 16-25th, 26th-End)
+                    <i class="fa-solid fa-clock-rotate-left text-primary me-2"></i>Monthly Upliftment Distribution (Exc. Special)
                   </h6>
                   <span class="badge bg-light text-secondary border" id="primaryUpliftFYBadge">FY 26-27 (Current)</span>
                 </div>
-                <div style="height: 270px; position: relative;">
+                <div style="height: 210px; position: relative;">
                   <canvas id="primaryUpliftmentChart"></canvas>
                 </div>
+                <div class="mt-2 pt-1 border-top d-flex justify-content-around text-center" style="font-size: 0.75rem;" id="incentiveLostSummary"></div>
               </div>
             </div>
           </div>
@@ -680,10 +733,10 @@
             </div>
           </div>
 
-          <!-- Row 4: Product Segment Performance -->
+          <!-- Row 4: Product Segment Performance & Servo vs Genuine vs Industrial (FY 25-26 vs FY 26-27 Comparison) -->
           <div class="row g-3 mb-3">
-            <div class="col-12">
-              <div class="dashboard-card p-3">
+            <div class="col-12 col-lg-7">
+              <div class="dashboard-card p-3 h-100">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <h6 class="fw-bold text-dark mb-0">
                     <i class="fa-solid fa-layer-group text-info me-2"></i>Product Segment Performance (FY 25-26 vs FY 26-27 in KL)
@@ -691,6 +744,19 @@
                 </div>
                 <div style="height: 250px; position: relative;">
                   <canvas id="primaryProductSegmentChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-5">
+              <div class="dashboard-card p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h6 class="fw-bold text-dark mb-0">
+                    <i class="fa-solid fa-shield-halved text-success me-2"></i>Servo vs Genuine vs Industrial (FY 25-26 vs FY 26-27)
+                  </h6>
+                </div>
+                <div style="height: 250px; position: relative;">
+                  <canvas id="servoGenuineIndustrialChart"></canvas>
                 </div>
               </div>
             </div>
@@ -754,7 +820,7 @@
               </select>
             </div>
 
-            <!-- SECONDARY MULTI-MONTH SELECTION -->
+            <!-- Sales Months -->
             <div class="col-12 col-sm-6 col-md-3 col-xl-2">
               <label class="form-label-xs"><i class="fa-solid fa-calendar-days text-warning me-1"></i> Sales Months (Multi)</label>
               <div class="dropdown">
@@ -775,35 +841,74 @@
               </div>
             </div>
 
-            <!-- PRODUCT SEGMENT FILTER (SECONDARY) -->
+            <!-- Product Segment (Multi-Select) -->
             <div class="col-12 col-sm-6 col-md-3 col-xl-2">
-              <label class="form-label-xs text-dark"><i class="fa-solid fa-layer-group text-warning me-1"></i> Product Segment</label>
-              <select id="sFilterProdSegment" class="form-select form-select-sm" onchange="applySecondaryFilters()">
-                <option value="ALL">All Product Segments</option>
-              </select>
+              <label class="form-label-xs text-dark"><i class="fa-solid fa-layer-group text-warning me-1"></i> Product Segment (Multi)</label>
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline-primary dropdown-toggle w-100 text-truncate text-start d-flex justify-content-between align-items-center fw-bold" 
+                        type="button" id="sProdSegDropdownBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                  <span id="sProdSegSelectedLabel">All Product Segments</span>
+                </button>
+                <div class="dropdown-menu multi-select-dropdown shadow-lg border-0" aria-labelledby="sProdSegDropdownBtn">
+                  <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                    <span class="small fw-bold text-muted">Select Segments:</span>
+                    <div>
+                      <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none me-2 small" onclick="setSecondaryProdSegments(true)">All</button>
+                      <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none text-danger small" onclick="setSecondaryProdSegments(false)">Clear</button>
+                    </div>
+                  </div>
+                  <div class="multi-select-grid" id="sProdSegCheckboxGrid"></div>
+                </div>
+              </div>
             </div>
 
-            <!-- Customer Group / Channel -->
+            <!-- Customer Group / Channel (Multi-Select) -->
             <div class="col-12 col-sm-6 col-md-3 col-xl-2">
-              <label class="form-label-xs">Customer Group / Channel</label>
-              <select id="sFilterChannel" class="form-select form-select-sm" onchange="applySecondaryFilters()">
-                <option value="ALL">All Customer Groups</option>
-              </select>
+              <label class="form-label-xs">Customer Group (Multi)</label>
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle w-100 text-truncate text-start d-flex justify-content-between align-items-center" 
+                        type="button" id="sChannelDropdownBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                  <span id="sChannelSelectedLabel">All Channels</span>
+                </button>
+                <div class="dropdown-menu multi-select-dropdown shadow-lg border-0" aria-labelledby="sChannelDropdownBtn">
+                  <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                    <span class="small fw-bold text-muted">Select Channels:</span>
+                    <div>
+                      <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none me-2 small" onclick="setSecondaryChannels(true)">All</button>
+                      <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none text-danger small" onclick="setSecondaryChannels(false)">Clear</button>
+                    </div>
+                  </div>
+                  <div class="multi-select-grid" id="sChannelCheckboxGrid"></div>
+                </div>
+              </div>
             </div>
 
-            <!-- SSF -->
+            <!-- SSF (Multi-Select) -->
             <div class="col-12 col-sm-6 col-md-3 col-xl-1">
-              <label class="form-label-xs">SSF</label>
-              <select id="sFilterSSF" class="form-select form-select-sm" onchange="applySecondaryFilters()">
-                <option value="ALL">All</option>
-              </select>
+              <label class="form-label-xs">SSF (Multi)</label>
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle w-100 text-truncate text-start d-flex justify-content-between align-items-center" 
+                        type="button" id="sSSFDropdownBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                  <span id="sSSFSelectedLabel">All</span>
+                </button>
+                <div class="dropdown-menu multi-select-dropdown shadow-lg border-0" aria-labelledby="sSSFDropdownBtn">
+                  <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                    <span class="small fw-bold text-muted">Select SSF:</span>
+                    <div>
+                      <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none me-2 small" onclick="setSecondarySSFs(true)">All</button>
+                      <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none text-danger small" onclick="setSecondarySSFs(false)">Clear</button>
+                    </div>
+                  </div>
+                  <div class="multi-select-grid" id="sSSFCheckboxGrid"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- 2. CAPTURE AREA (STARTING FROM BELOW THE FILTER BAR) -->
         <div id="secondaryExportCaptureArea" class="capture-container">
-          <!-- Secondary KPI Strip: Counter Comparison FY 26-27 vs FY 25-26 Entire Year -->
+          <!-- Secondary KPI Strip -->
           <div class="row g-2 mb-3">
             <div class="col-6 col-md-4 col-xl-2">
               <div class="kpi-card kpi-blue">
@@ -879,7 +984,7 @@
             </div>
           </div>
 
-          <!-- Secondary Row 2: Product Segment (Column BD) Section -->
+          <!-- Secondary Row 2: Product Segment Section -->
           <div class="row g-3 mb-3">
             <div class="col-12">
               <div class="dashboard-card p-3">
@@ -911,62 +1016,62 @@
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Secondary Pivot Matrix -->
-        <div class="dashboard-card p-3 mb-3">
-          <div class="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-2 mb-3 gap-2">
-            <div>
-              <h5 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
-                <i class="fa-solid fa-table-list text-warning"></i> Secondary Dynamic Cross-Tab Matrix
-              </h5>
-              <small class="text-muted">Analyze secondary off-take across Stockist, Product Segment, Channel, Month & Financial Year</small>
+          <!-- Secondary Pivot Matrix Included in Export Area -->
+          <div class="dashboard-card p-3 mt-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-2 mb-3 gap-2">
+              <div>
+                <h5 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+                  <i class="fa-solid fa-table-list text-warning"></i> Secondary Dynamic Cross-Tab Matrix
+                </h5>
+                <small class="text-muted">Analyze secondary off-take across Stockist, Product Segment, Channel, Month & Financial Year</small>
+              </div>
+              <div class="d-flex gap-2">
+                <button class="btn btn-outline-primary btn-sm" onclick="exportPivotToCSV('secondaryPivotTable', 'Secondary_Pivot_Analysis.csv')">
+                  <i class="fa-solid fa-file-csv me-1"></i> Export Matrix CSV
+                </button>
+              </div>
             </div>
-            <div class="d-flex gap-2">
-              <button class="btn btn-outline-primary btn-sm" onclick="exportPivotToCSV('secondaryPivotTable', 'Secondary_Pivot_Analysis.csv')">
-                <i class="fa-solid fa-file-csv me-1"></i> Export Matrix CSV
-              </button>
-            </div>
-          </div>
 
-          <div class="row g-2 align-items-end mb-3 bg-light p-2 rounded-3 border">
-            <div class="col-12 col-md-3">
-              <label class="form-label-xs text-primary"><i class="fa-solid fa-arrows-up-down me-1"></i> ROW Dimension</label>
-              <select id="sPivotRowDim" class="form-select form-select-sm fw-semibold" onchange="renderSecondaryPivot()">
-                <option value="CustomerGroup" selected>Customer Group / Channel</option>
-                <option value="ProductSegment">Product Segment (Column BD)</option>
-                <option value="Stockist">Parent Stockist</option>
-                <option value="SSF">Field Officer / SSF</option>
-                <option value="Month">Month</option>
-                <option value="FY">Financial Year</option>
-              </select>
+            <div class="row g-2 align-items-end mb-3 bg-light p-2 rounded-3 border">
+              <div class="col-12 col-md-3">
+                <label class="form-label-xs text-primary"><i class="fa-solid fa-arrows-up-down me-1"></i> ROW Dimension</label>
+                <select id="sPivotRowDim" class="form-select form-select-sm fw-semibold" onchange="renderSecondaryPivot()">
+                  <option value="CustomerGroup" selected>Customer Group / Channel</option>
+                  <option value="ProductSegment">Product Segment</option>
+                  <option value="Stockist">Parent Stockist</option>
+                  <option value="SSF">Field Officer / SSF</option>
+                  <option value="Month">Month</option>
+                  <option value="FY">Financial Year</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-3">
+                <label class="form-label-xs text-success"><i class="fa-solid fa-arrows-left-right me-1"></i> COLUMN Dimension</label>
+                <select id="sPivotColDim" class="form-select form-select-sm fw-semibold" onchange="renderSecondaryPivot()">
+                  <option value="FY" selected>Financial Year (FY 25-26 vs FY 26-27)</option>
+                  <option value="ProductSegment">Product Segment</option>
+                  <option value="CustomerGroup">Customer Group / Channel</option>
+                  <option value="Month">Month</option>
+                  <option value="Stockist">Parent Stockist</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-3">
+                <label class="form-label-xs text-danger"><i class="fa-solid fa-calculator me-1"></i> VALUE METRIC</label>
+                <select id="sPivotMetric" class="form-select form-select-sm fw-semibold" onchange="renderSecondaryPivot()">
+                  <option value="volumeKL" selected>Volume (KL)</option>
+                  <option value="count">Invoice / Transaction Count</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-3">
+                <button class="btn btn-servo w-100 btn-sm" onclick="renderSecondaryPivot()">
+                  <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Generate Secondary Matrix
+                </button>
+              </div>
             </div>
-            <div class="col-12 col-md-3">
-              <label class="form-label-xs text-success"><i class="fa-solid fa-arrows-left-right me-1"></i> COLUMN Dimension</label>
-              <select id="sPivotColDim" class="form-select form-select-sm fw-semibold" onchange="renderSecondaryPivot()">
-                <option value="FY" selected>Financial Year (FY 25-26 vs FY 26-27)</option>
-                <option value="ProductSegment">Product Segment (Column BD)</option>
-                <option value="CustomerGroup">Customer Group / Channel</option>
-                <option value="Month">Month</option>
-                <option value="Stockist">Parent Stockist</option>
-              </select>
-            </div>
-            <div class="col-12 col-md-3">
-              <label class="form-label-xs text-danger"><i class="fa-solid fa-calculator me-1"></i> VALUE METRIC</label>
-              <select id="sPivotMetric" class="form-select form-select-sm fw-semibold" onchange="renderSecondaryPivot()">
-                <option value="volumeKL" selected>Volume (KL)</option>
-                <option value="count">Invoice / Transaction Count</option>
-              </select>
-            </div>
-            <div class="col-12 col-md-3">
-              <button class="btn btn-servo w-100 btn-sm" onclick="renderSecondaryPivot()">
-                <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Generate Secondary Matrix
-              </button>
-            </div>
-          </div>
 
-          <div class="pivot-container" id="secondaryPivotContainer">
-            <table class="table table-bordered table-sm pivot-table" id="secondaryPivotTable"></table>
+            <div class="pivot-container" id="secondaryPivotContainer">
+              <table class="table table-bordered table-sm pivot-table" id="secondaryPivotTable"></table>
+            </div>
           </div>
         </div>
 
@@ -1125,7 +1230,30 @@
     let allSecondaryStockists = [];
     let selectedSecondaryStockists = new Set();
 
-    const STORAGE_KEY_TARGETS = "SERVO_STOCKIST_PRIMARY_TARGETS_V8";
+    // Multi-select tracking sets for Primary filters
+    let selectedPrimaryProdSegments = new Set();
+    let allPrimaryProdSegments = [];
+
+    let selectedPrimarySegments = new Set();
+    let allPrimarySegments = [];
+
+    let selectedPrimaryCategories = new Set();
+    let allPrimaryCategories = [];
+
+    let selectedPrimaryPackSizes = new Set();
+    let allPrimaryPackSizes = [];
+
+    // Multi-select tracking sets for Secondary filters
+    let selectedSecondaryProdSegments = new Set();
+    let allSecondaryProdSegments = [];
+
+    let selectedSecondaryChannels = new Set();
+    let allSecondaryChannels = [];
+
+    let selectedSecondarySSFs = new Set();
+    let allSecondarySSFs = [];
+
+    const STORAGE_KEY_TARGETS = "SERVO_STOCKIST_PRIMARY_TARGETS_V12";
     let stockistTargetStore = {};
 
     const DEFAULT_STOCKISTS = [
@@ -1144,6 +1272,7 @@
     let primaryTrendChartInstance = null;
     let primaryPackSizeChartInstance = null;
     let primaryProductSegmentChartInstance = null;
+    let servoGenuineIndustrialChartInstance = null;
 
     let secondaryMonthlyChartInstance = null;
     let secondaryChannelChartInstance = null;
@@ -1237,6 +1366,7 @@
 
       const segs = ["DEO", "4T", "AGRI", "GEAR", "INDUSTRIAL", "SPECIALITY", "GREASE"];
       const prodSegs = ["CVO", "MCO-4T", "AGRI", "GEAR", "INDUSTRIAL", "SPECIALITY", "GREASE"];
+      const colUTypes = ["Servo", "Genuine", "Industrial"];
       const cats = ["MASS", "PREMIUM", "ASPIRATIONAL"];
 
       pStockists.forEach(stk => {
@@ -1249,6 +1379,7 @@
             Stockist: stk.name,
             Segment: segs[mIdx % segs.length],
             ProductSegment: prodSegs[mIdx % prodSegs.length],
+            ServoType: colUTypes[mIdx % colUTypes.length],
             ProductName: `SERVO ${segs[mIdx % segs.length]} Industrial`,
             CategoryColS: cats[mIdx % cats.length],
             Premium: cats[mIdx % cats.length] === 'PREMIUM' ? 'PREMIUM' : 'MASS',
@@ -1266,6 +1397,7 @@
               Stockist: stk.name,
               Segment: segs[mIdx % segs.length],
               ProductSegment: prodSegs[mIdx % prodSegs.length],
+              ServoType: colUTypes[mIdx % colUTypes.length],
               ProductName: `SERVO ${segs[mIdx % segs.length]} Commercial`,
               CategoryColS: cats[mIdx % cats.length],
               Premium: cats[mIdx % cats.length] === 'PREMIUM' ? 'PREMIUM' : 'MASS',
@@ -1306,8 +1438,7 @@
       primaryDataStore = pSeeds;
       secondaryDataStore = sSeeds;
 
-      initializeMultiStockistControls();
-      populateFilterOptions();
+      initializeAllMultiSelects();
       applyPrimaryFilters();
       applySecondaryFilters();
     }
@@ -1595,100 +1726,51 @@
     }
 
     /* =========================================================
-       MULTI-STOCKIST & MULTI-MONTH UI BUILDERS
+       MULTI-SELECT CONTROLS BUILDERS
        ========================================================= */
-    function initializeMultiStockistControls() {
+    function initializeAllMultiSelects() {
+      // Setup Primary
       allPrimaryStockists = [...new Set(primaryDataStore.map(d => d.Stockist))].filter(Boolean).sort();
       selectedPrimaryStockists = new Set(allPrimaryStockists);
+      populateMultiSelectGrid('pStockistCheckboxGrid', allPrimaryStockists, selectedPrimaryStockists, 'pStockistSelectedLabel', 'All Stockists');
 
-      const pGrid = document.getElementById('pStockistCheckboxGrid');
-      if (pGrid) {
-        pGrid.innerHTML = '';
-        allPrimaryStockists.forEach(stk => {
-          const label = document.createElement('label');
-          label.className = 'checkbox-item-label';
-          label.innerHTML = `
-            <input type="checkbox" class="form-check-input mt-0 p-stk-check" value="${escapeHtml(stk)}" checked onchange="handlePrimaryStockistToggle('${escapeHtml(stk)}', this.checked)">
-            <span class="text-truncate">${escapeHtml(stk)}</span>
-          `;
-          pGrid.appendChild(label);
-        });
-      }
-      updatePrimaryStockistButtonLabel();
+      allPrimaryProdSegments = [...new Set(primaryDataStore.map(d => d.ProductSegment))].filter(Boolean).sort();
+      selectedPrimaryProdSegments = new Set(allPrimaryProdSegments);
+      populateMultiSelectGrid('pProdSegCheckboxGrid', allPrimaryProdSegments, selectedPrimaryProdSegments, 'pProdSegSelectedLabel', 'All Product Segments');
 
+      allPrimarySegments = [...new Set(primaryDataStore.map(d => d.Segment))].filter(Boolean).sort();
+      selectedPrimarySegments = new Set(allPrimarySegments);
+      populateMultiSelectGrid('pSegmentCheckboxGrid', allPrimarySegments, selectedPrimarySegments, 'pSegmentSelectedLabel', 'All');
+
+      allPrimaryCategories = [...new Set(primaryDataStore.map(d => d.CategoryColS))].filter(Boolean).sort();
+      selectedPrimaryCategories = new Set(allPrimaryCategories);
+      populateMultiSelectGrid('pCategoryCheckboxGrid', allPrimaryCategories, selectedPrimaryCategories, 'pCategorySelectedLabel', 'All');
+
+      allPrimaryPackSizes = [...new Set(primaryDataStore.map(d => d.PackSize))].filter(Boolean).sort();
+      selectedPrimaryPackSizes = new Set(allPrimaryPackSizes);
+      populateMultiSelectGrid('pPackSizeCheckboxGrid', allPrimaryPackSizes, selectedPrimaryPackSizes, 'pPackSizeSelectedLabel', 'All');
+
+      // Setup Secondary
       allSecondaryStockists = [...new Set(secondaryDataStore.map(d => d.Stockist))].filter(Boolean).sort();
       selectedSecondaryStockists = new Set(allSecondaryStockists);
+      populateMultiSelectGrid('sStockistCheckboxGrid', allSecondaryStockists, selectedSecondaryStockists, 'sStockistSelectedLabel', 'All Stockists');
 
-      const sGrid = document.getElementById('sStockistCheckboxGrid');
-      if (sGrid) {
-        sGrid.innerHTML = '';
-        allSecondaryStockists.forEach(stk => {
-          const label = document.createElement('label');
-          label.className = 'checkbox-item-label';
-          label.innerHTML = `
-            <input type="checkbox" class="form-check-input mt-0 s-stk-check" value="${escapeHtml(stk)}" checked onchange="handleSecondaryStockistToggle('${escapeHtml(stk)}', this.checked)">
-            <span class="text-truncate">${escapeHtml(stk)}</span>
-          `;
-          sGrid.appendChild(label);
-        });
-      }
-      updateSecondaryStockistButtonLabel();
+      allSecondaryProdSegments = [...new Set(secondaryDataStore.map(d => d.ProductSegment))].filter(Boolean).sort();
+      selectedSecondaryProdSegments = new Set(allSecondaryProdSegments);
+      populateMultiSelectGrid('sProdSegCheckboxGrid', allSecondaryProdSegments, selectedSecondaryProdSegments, 'sProdSegSelectedLabel', 'All Product Segments');
+
+      allSecondaryChannels = [...new Set(secondaryDataStore.map(d => d.CustomerGroup))].filter(Boolean).sort();
+      selectedSecondaryChannels = new Set(allSecondaryChannels);
+      populateMultiSelectGrid('sChannelCheckboxGrid', allSecondaryChannels, selectedSecondaryChannels, 'sChannelSelectedLabel', 'All Channels');
+
+      allSecondarySSFs = [...new Set(secondaryDataStore.map(d => d.SSF))].filter(Boolean).sort();
+      selectedSecondarySSFs = new Set(allSecondarySSFs);
+      populateMultiSelectGrid('sSSFCheckboxGrid', allSecondarySSFs, selectedSecondarySSFs, 'sSSFSelectedLabel', 'All');
     }
 
-    function handlePrimaryStockistToggle(stk, isChecked) {
-      if (isChecked) selectedPrimaryStockists.add(stk);
-      else selectedPrimaryStockists.delete(stk);
-      updatePrimaryStockistButtonLabel();
-      applyPrimaryFilters();
-    }
-
-    function setPrimaryStockists(selectAll) {
-      if (selectAll) selectedPrimaryStockists = new Set(allPrimaryStockists);
-      else selectedPrimaryStockists.clear();
-
-      document.querySelectorAll('.p-stk-check').forEach(cb => {
-        cb.checked = selectAll;
-      });
-      updatePrimaryStockistButtonLabel();
-      applyPrimaryFilters();
-    }
-
-    function updatePrimaryStockistButtonLabel() {
-      const count = selectedPrimaryStockists.size;
-      const total = allPrimaryStockists.length;
-      let label = 'All Stockists';
-      if (count === 0) label = 'No Stockist Selected';
-      else if (count === 1) label = Array.from(selectedPrimaryStockists)[0];
-      else if (count < total) label = `${count} Stockists Selected`;
-      setText('pStockistSelectedLabel', label);
-    }
-
-    function handleSecondaryStockistToggle(stk, isChecked) {
-      if (isChecked) selectedSecondaryStockists.add(stk);
-      else selectedSecondaryStockists.delete(stk);
-      updateSecondaryStockistButtonLabel();
-      applySecondaryFilters();
-    }
-
-    function setSecondaryStockists(selectAll) {
-      if (selectAll) selectedSecondaryStockists = new Set(allSecondaryStockists);
-      else selectedSecondaryStockists.clear();
-
-      document.querySelectorAll('.s-stk-check').forEach(cb => {
-        cb.checked = selectAll;
-      });
-      updateSecondaryStockistButtonLabel();
-      applySecondaryFilters();
-    }
-
-    function updateSecondaryStockistButtonLabel() {
-      const count = selectedSecondaryStockists.size;
-      const total = allSecondaryStockists.length;
-      let label = 'All Stockists';
-      if (count === 0) label = 'No Stockist Selected';
-      else if (count === 1) label = Array.from(selectedSecondaryStockists)[0];
-      else if (count < total) label = `${count} Stockists Selected`;
-      setText('sStockistSelectedLabel', label);
+    function initializeMultiStockistControls() {
+      // Delegate to central multi-select init
+      initializeAllMultiSelects();
     }
 
     function initializeMonthDropdowns() {
@@ -1734,10 +1816,7 @@
     function setPrimaryMonths(selectAll) {
       if (selectAll) selectedPrimaryMonths = new Set([...MONTH_ORDER]);
       else selectedPrimaryMonths.clear();
-      
-      document.querySelectorAll('.p-month-check').forEach(cb => {
-        cb.checked = selectAll;
-      });
+      document.querySelectorAll('.p-month-check').forEach(cb => { cb.checked = selectAll; });
       updatePrimaryMonthButtonLabel();
       applyPrimaryFilters();
     }
@@ -1761,10 +1840,7 @@
     function setSecondaryMonths(selectAll) {
       if (selectAll) selectedSecondaryMonths = new Set([...MONTH_ORDER]);
       else selectedSecondaryMonths.clear();
-
-      document.querySelectorAll('.s-month-check').forEach(cb => {
-        cb.checked = selectAll;
-      });
+      document.querySelectorAll('.s-month-check').forEach(cb => { cb.checked = selectAll; });
       updateSecondaryMonthButtonLabel();
       applySecondaryFilters();
     }
@@ -1776,6 +1852,139 @@
       else if (count <= 3) label = Array.from(selectedSecondaryMonths).sort((a,b) => MONTH_ORDER.indexOf(a) - MONTH_ORDER.indexOf(b)).join(', ');
       else if (count < 12) label = `${count} Months Selected`;
       setText('sMonthSelectedLabel', label);
+    }
+
+    function populateMultiSelectGrid(gridId, uniqueValues, selectedSet, labelId, allName) {
+      const grid = document.getElementById(gridId);
+      if (!grid) return;
+      grid.innerHTML = '';
+      uniqueValues.forEach(val => {
+        const isChecked = selectedSet.has(val);
+        const label = document.createElement('label');
+        label.className = 'checkbox-item-label';
+        label.innerHTML = `
+          <input type="checkbox" class="form-check-input mt-0" value="${escapeHtml(val)}" ${isChecked ? 'checked' : ''} onchange="handleGenericToggle('${gridId}', '${escapeHtml(val)}', this.checked)">
+          <span class="text-truncate">${escapeHtml(val)}</span>
+        `;
+        grid.appendChild(label);
+      });
+      updateGenericLabel(gridId, selectedSet, labelId, allName);
+    }
+
+    function handleGenericToggle(gridId, val, isChecked) {
+      if (gridId === 'pStockistCheckboxGrid') {
+        if (isChecked) selectedPrimaryStockists.add(val); else selectedPrimaryStockists.delete(val);
+        updateGenericLabel(gridId, selectedPrimaryStockists, 'pStockistSelectedLabel', 'All Stockists');
+        applyPrimaryFilters();
+      } else if (gridId === 'pProdSegCheckboxGrid') {
+        if (isChecked) selectedPrimaryProdSegments.add(val); else selectedPrimaryProdSegments.delete(val);
+        updateGenericLabel(gridId, selectedPrimaryProdSegments, 'pProdSegSelectedLabel', 'All Product Segments');
+        applyPrimaryFilters();
+      } else if (gridId === 'pSegmentCheckboxGrid') {
+        if (isChecked) selectedPrimarySegments.add(val); else selectedPrimarySegments.delete(val);
+        updateGenericLabel(gridId, selectedPrimarySegments, 'pSegmentSelectedLabel', 'All');
+        applyPrimaryFilters();
+      } else if (gridId === 'pCategoryCheckboxGrid') {
+        if (isChecked) selectedPrimaryCategories.add(val); else selectedPrimaryCategories.delete(val);
+        updateGenericLabel(gridId, selectedPrimaryCategories, 'pCategorySelectedLabel', 'All');
+        applyPrimaryFilters();
+      } else if (gridId === 'pPackSizeCheckboxGrid') {
+        if (isChecked) selectedPrimaryPackSizes.add(val); else selectedPrimaryPackSizes.delete(val);
+        updateGenericLabel(gridId, selectedPrimaryPackSizes, 'pPackSizeSelectedLabel', 'All');
+        applyPrimaryFilters();
+      } else if (gridId === 'sStockistCheckboxGrid') {
+        if (isChecked) selectedSecondaryStockists.add(val); else selectedSecondaryStockists.delete(val);
+        updateGenericLabel(gridId, selectedSecondaryStockists, 'sStockistSelectedLabel', 'All Stockists');
+        applySecondaryFilters();
+      } else if (gridId === 'sProdSegCheckboxGrid') {
+        if (isChecked) selectedSecondaryProdSegments.add(val); else selectedSecondaryProdSegments.delete(val);
+        updateGenericLabel(gridId, selectedSecondaryProdSegments, 'sProdSegSelectedLabel', 'All Product Segments');
+        applySecondaryFilters();
+      } else if (gridId === 'sChannelCheckboxGrid') {
+        if (isChecked) selectedSecondaryChannels.add(val); else selectedSecondaryChannels.delete(val);
+        updateGenericLabel(gridId, selectedSecondaryChannels, 'sChannelSelectedLabel', 'All Channels');
+        applySecondaryFilters();
+      } else if (gridId === 'sSSFCheckboxGrid') {
+        if (isChecked) selectedSecondarySSFs.add(val); else selectedSecondarySSFs.delete(val);
+        updateGenericLabel(gridId, selectedSecondarySSFs, 'sSSFSelectedLabel', 'All');
+        applySecondaryFilters();
+      }
+    }
+
+    function updateGenericLabel(gridId, setObj, labelId, allName) {
+      const count = setObj.size;
+      let total = 0;
+      if (gridId.includes('pStockist')) total = allPrimaryStockists.length;
+      else if (gridId.includes('pProdSeg')) total = allPrimaryProdSegments.length;
+      else if (gridId.includes('pSegment')) total = allPrimarySegments.length;
+      else if (gridId.includes('pCategory')) total = allPrimaryCategories.length;
+      else if (gridId.includes('pPackSize')) total = allPrimaryPackSizes.length;
+      else if (gridId.includes('sStockist')) total = allSecondaryStockists.length;
+      else if (gridId.includes('sProdSeg')) total = allSecondaryProdSegments.length;
+      else if (gridId.includes('sChannel')) total = allSecondaryChannels.length;
+      else if (gridId.includes('sSSF')) total = allSecondarySSFs.length;
+
+      let label = allName;
+      if (count === 0) label = 'None Selected';
+      else if (count === 1) label = Array.from(setObj)[0];
+      else if (count < total) label = `${count} Selected`;
+      setText(labelId, label);
+    }
+
+    function setPrimaryStockists(selectAll) {
+      if (selectAll) selectedPrimaryStockists = new Set(allPrimaryStockists); else selectedPrimaryStockists.clear();
+      document.querySelectorAll('#pStockistCheckboxGrid input').forEach(cb => cb.checked = selectAll);
+      updateGenericLabel('pStockistCheckboxGrid', selectedPrimaryStockists, 'pStockistSelectedLabel', 'All Stockists');
+      applyPrimaryFilters();
+    }
+    function setPrimaryProdSegments(selectAll) {
+      if (selectAll) selectedPrimaryProdSegments = new Set(allPrimaryProdSegments); else selectedPrimaryProdSegments.clear();
+      document.querySelectorAll('#pProdSegCheckboxGrid input').forEach(cb => cb.checked = selectAll);
+      updateGenericLabel('pProdSegCheckboxGrid', selectedPrimaryProdSegments, 'pProdSegSelectedLabel', 'All Product Segments');
+      applyPrimaryFilters();
+    }
+    function setPrimarySegments(selectAll) {
+      if (selectAll) selectedPrimarySegments = new Set(allPrimarySegments); else selectedPrimarySegments.clear();
+      document.querySelectorAll('#pSegmentCheckboxGrid input').forEach(cb => cb.checked = selectAll);
+      updateGenericLabel('pSegmentCheckboxGrid', selectedPrimarySegments, 'pSegmentSelectedLabel', 'All');
+      applyPrimaryFilters();
+    }
+    function setPrimaryCategories(selectAll) {
+      if (selectAll) selectedPrimaryCategories = new Set(allPrimaryCategories); else selectedPrimaryCategories.clear();
+      document.querySelectorAll('#pCategoryCheckboxGrid input').forEach(cb => cb.checked = selectAll);
+      updateGenericLabel('pCategoryCheckboxGrid', selectedPrimaryCategories, 'pCategorySelectedLabel', 'All');
+      applyPrimaryFilters();
+    }
+    function setPrimaryPackSizes(selectAll) {
+      if (selectAll) selectedPrimaryPackSizes = new Set(allPrimaryPackSizes); else selectedPrimaryPackSizes.clear();
+      document.querySelectorAll('#pPackSizeCheckboxGrid input').forEach(cb => cb.checked = selectAll);
+      updateGenericLabel('pPackSizeCheckboxGrid', selectedPrimaryPackSizes, 'pPackSizeSelectedLabel', 'All');
+      applyPrimaryFilters();
+    }
+
+    function setSecondaryStockists(selectAll) {
+      if (selectAll) selectedSecondaryStockists = new Set(allSecondaryStockists); else selectedSecondaryStockists.clear();
+      document.querySelectorAll('#sStockistCheckboxGrid input').forEach(cb => cb.checked = selectAll);
+      updateGenericLabel('sStockistCheckboxGrid', selectedSecondaryStockists, 'sStockistSelectedLabel', 'All Stockists');
+      applySecondaryFilters();
+    }
+    function setSecondaryProdSegments(selectAll) {
+      if (selectAll) selectedSecondaryProdSegments = new Set(allSecondaryProdSegments); else selectedSecondaryProdSegments.clear();
+      document.querySelectorAll('#sProdSegCheckboxGrid input').forEach(cb => cb.checked = selectAll);
+      updateGenericLabel('sProdSegCheckboxGrid', selectedSecondaryProdSegments, 'sProdSegSelectedLabel', 'All Product Segments');
+      applySecondaryFilters();
+    }
+    function setSecondaryChannels(selectAll) {
+      if (selectAll) selectedSecondaryChannels = new Set(allSecondaryChannels); else selectedSecondaryChannels.clear();
+      document.querySelectorAll('#sChannelCheckboxGrid input').forEach(cb => cb.checked = selectAll);
+      updateGenericLabel('sChannelCheckboxGrid', selectedSecondaryChannels, 'sChannelSelectedLabel', 'All Channels');
+      applySecondaryFilters();
+    }
+    function setSecondarySSFs(selectAll) {
+      if (selectAll) selectedSecondarySSFs = new Set(allSecondarySSFs); else selectedSecondarySSFs.clear();
+      document.querySelectorAll('#sSSFCheckboxGrid input').forEach(cb => cb.checked = selectAll);
+      updateGenericLabel('sSSFCheckboxGrid', selectedSecondarySSFs, 'sSSFSelectedLabel', 'All');
+      applySecondaryFilters();
     }
 
     /* =========================================================
@@ -1819,6 +2028,8 @@
                 const headerKey = headers[idx] || `col_${idx}`;
                 const cellVal = cell ? (cell.v !== null && cell.v !== undefined ? cell.v : (cell.f || "")) : "";
                 rowObj[headerKey] = cellVal;
+                // Expose raw index exactly for Column U (index 20) mapping
+                rowObj[`__COL_${idx}`] = cellVal;
                 if (cellVal !== "") hasData = true;
               });
               if (hasData) records.push(rowObj);
@@ -1869,14 +2080,24 @@
               const rawMonth = row['Month'] || row['BILLING MONTH'];
               const rawDate = row['Inv.Date'] || row['Invoice Date'] || "";
               const invDay = extractDayFromDate(rawDate);
-              const seg = (row['SEGMENTATION'] || row['Segment'] || row['PRODUCT CATEGORY'] || "DEO").toString().trim();
+              const seg = (row['SEGMENTATION'] || row['Segment'] || "DEO").toString().trim();
               
               const colS = (row['Category'] || row['Categorisation'] || row['Premium'] || "MASS").toString().trim().toUpperCase();
               const isPrem = (colS === 'PREMIUM');
 
               const prodSegment = (row['Product segment 26-27'] || row['Product Segment'] || seg).toString().trim();
+              
+              // Column U strictly parsed using raw column index 20
+              const colUVal = (row['__COL_20'] || row['Servo vs Genuine vs Industrial'] || "Servo").toString().trim();
+              let servoTypeNorm = "Servo";
+              const uUpper = colUVal.toUpperCase();
+              if (uUpper.includes('GENUINE') || uUpper.includes('OEM')) servoTypeNorm = "Genuine";
+              else if (uUpper.includes('IND') || uUpper.includes('HYDRASHAKTI')) servoTypeNorm = "Industrial";
+              else if (uUpper.includes('SERVO')) servoTypeNorm = "Servo";
+              else servoTypeNorm = colUVal || "Servo";
+
               const psize = (row['PackSize'] || row['PACK SIZE'] || "210 L").toString().trim();
-              const qty = parseFloat(row['Invoiced Quantity'] || row['Billing qty in SKU'] || row['Qty'] || 1);
+              const qty = parseFloat(row['Invoiced Quantity'] || row['Billing qty in SKU'] || 1);
               const kl = parseFloat(row['KL'] || row['VOL IN KL'] || row['Volume (KL)'] || (qty * 0.05));
 
               newPrimary.push({
@@ -1887,6 +2108,7 @@
                 Stockist: rawStk.toString().trim(),
                 Segment: seg,
                 ProductSegment: prodSegment || "OTHER",
+                ServoType: servoTypeNorm,
                 ProductName: (row['Description'] || row['Material'] || "SERVO Lube").toString().trim(),
                 CategoryColS: colS || "MASS",
                 Premium: isPrem ? 'PREMIUM' : 'MASS',
@@ -1957,8 +2179,7 @@
       });
       renderTargetManagementTable();
 
-      initializeMultiStockistControls();
-      populateFilterOptions();
+      initializeAllMultiSelects();
       applyPrimaryFilters();
       applySecondaryFilters();
 
@@ -1978,55 +2199,19 @@
     }
 
     /* =========================================================
-       FILTER DROPDOWNS SETUP
-       ========================================================= */
-    function populateFilterOptions() {
-      populateSelect('pFilterSegment', [...new Set(primaryDataStore.map(d => d.Segment))]);
-      populateSelect('pFilterProdSegment', [...new Set(primaryDataStore.map(d => d.ProductSegment))]);
-      populateSelect('pFilterPremium', [...new Set(primaryDataStore.map(d => d.CategoryColS))]);
-      populateSelect('pFilterPackSize', [...new Set(primaryDataStore.map(d => d.PackSize))]);
-
-      populateSelect('sFilterChannel', [...new Set(secondaryDataStore.map(d => d.CustomerGroup))]);
-      populateSelect('sFilterProdSegment', [...new Set(secondaryDataStore.map(d => d.ProductSegment))]);
-      populateSelect('sFilterSSF', [...new Set(secondaryDataStore.map(d => d.SSF))]);
-    }
-
-    function populateSelect(elemId, uniqueValues) {
-      const select = document.getElementById(elemId);
-      if (!select) return;
-      const currentVal = select.value;
-      const firstOpt = select.options[0]?.text || "All";
-      
-      select.innerHTML = `<option value="ALL">${firstOpt}</option>`;
-      uniqueValues.filter(Boolean).sort().forEach(val => {
-        const opt = document.createElement('option');
-        opt.value = val;
-        opt.textContent = val;
-        select.appendChild(opt);
-      });
-      if (uniqueValues.includes(currentVal)) {
-        select.value = currentVal;
-      }
-    }
-
-    /* =========================================================
-       PRIMARY INTERFACE: FILTERS, KPIS & CHARTS
+       PRIMARY INTERFACE: MULTI-DIMENSIONAL FILTERS & KPIS
        ========================================================= */
     function applyPrimaryFilters() {
       const fy = document.getElementById('pFilterFY')?.value || 'ALL';
-      const seg = document.getElementById('pFilterSegment')?.value || 'ALL';
-      const prodSeg = document.getElementById('pFilterProdSegment')?.value || 'ALL';
-      const colSCat = document.getElementById('pFilterPremium')?.value || 'ALL';
-      const psize = document.getElementById('pFilterPackSize')?.value || 'ALL';
 
       filteredPrimaryData = primaryDataStore.filter(item => {
         if (!selectedPrimaryStockists.has(item.Stockist)) return false;
         if (fy !== 'ALL' && item.FY !== fy) return false;
         if (!selectedPrimaryMonths.has(item.Month)) return false;
-        if (seg !== 'ALL' && item.Segment !== seg) return false;
-        if (prodSeg !== 'ALL' && item.ProductSegment !== prodSeg) return false;
-        if (colSCat !== 'ALL' && item.CategoryColS !== colSCat) return false;
-        if (psize !== 'ALL' && item.PackSize !== psize) return false;
+        if (selectedPrimaryProdSegments.size > 0 && !selectedPrimaryProdSegments.has(item.ProductSegment)) return false;
+        if (selectedPrimarySegments.size > 0 && !selectedPrimarySegments.has(item.Segment)) return false;
+        if (selectedPrimaryCategories.size > 0 && !selectedPrimaryCategories.has(item.CategoryColS)) return false;
+        if (selectedPrimaryPackSizes.size > 0 && !selectedPrimaryPackSizes.has(item.PackSize)) return false;
         return true;
       });
 
@@ -2043,7 +2228,7 @@
         setText(id, effFYLabel);
       });
 
-      updatePrimaryKPIs(seg, prodSeg, colSCat, psize, fy);
+      updatePrimaryKPIs(fy);
       renderPrimaryCharts(fy);
     }
 
@@ -2051,22 +2236,22 @@
       setPrimaryStockists(true);
       if (document.getElementById('pFilterFY')) document.getElementById('pFilterFY').value = 'ALL';
       setPrimaryMonths(true);
-      if (document.getElementById('pFilterSegment')) document.getElementById('pFilterSegment').value = 'ALL';
-      if (document.getElementById('pFilterProdSegment')) document.getElementById('pFilterProdSegment').value = 'ALL';
-      if (document.getElementById('pFilterPremium')) document.getElementById('pFilterPremium').value = 'ALL';
-      if (document.getElementById('pFilterPackSize')) document.getElementById('pFilterPackSize').value = 'ALL';
+      setPrimaryProdSegments(true);
+      setPrimarySegments(true);
+      setPrimaryCategories(true);
+      setPrimaryPackSizes(true);
       applyPrimaryFilters();
       showToast("Primary filters reset.");
     }
 
-    function updatePrimaryKPIs(seg, prodSeg, colSCat, psize, selectedFY) {
+    function updatePrimaryKPIs(selectedFY) {
       const baseForComparison = primaryDataStore.filter(item => {
         if (!selectedPrimaryStockists.has(item.Stockist)) return false;
         if (!selectedPrimaryMonths.has(item.Month)) return false;
-        if (seg !== 'ALL' && item.Segment !== seg) return false;
-        if (prodSeg !== 'ALL' && item.ProductSegment !== prodSeg) return false;
-        if (colSCat !== 'ALL' && item.CategoryColS !== colSCat) return false;
-        if (psize !== 'ALL' && item.PackSize !== psize) return false;
+        if (selectedPrimaryProdSegments.size > 0 && !selectedPrimaryProdSegments.has(item.ProductSegment)) return false;
+        if (selectedPrimarySegments.size > 0 && !selectedPrimarySegments.has(item.Segment)) return false;
+        if (selectedPrimaryCategories.size > 0 && !selectedPrimaryCategories.has(item.CategoryColS)) return false;
+        if (selectedPrimaryPackSizes.size > 0 && !selectedPrimaryPackSizes.has(item.PackSize)) return false;
         return true;
       });
 
@@ -2077,14 +2262,12 @@
 
       const targetKL = getFilteredTargetKL(selectedPrimaryStockists, selectedPrimaryMonths);
 
-      // Evaluate Premium Ratio dynamically based on the Selected FY
       let premTargetRecords = [];
       let premFYBadgeText = "FY 26-27";
       if (selectedFY === 'FY 25-26') {
         premTargetRecords = baseForComparison.filter(d => d.FY === 'FY 25-26');
         premFYBadgeText = "FY 25-26";
       } else {
-        // Includes 'ALL' or 'FY 26-27'
         premTargetRecords = baseForComparison.filter(d => d.FY === 'FY 26-27');
         premFYBadgeText = "FY 26-27";
       }
@@ -2115,13 +2298,14 @@
 
       setText('kpiPriTargetVol', formatVol(targetKL));
       
-      // Update Premium Ratio Elements
+      // FIXED ID MATCHING FOR PREMIUM RATIO & VOLUME
       setText('kpiPriPremRatio', formatPct(premRatio));
-      const premRatioElem = document.getElementById('kpiPriPremRatio');
-      if (premRatioElem) premRatioElem.className = 'kpi-value text-success';
-      setText('kpiPremFYLabel', premFYBadgeText);
+      const premElem = document.getElementById('kpiPriPremRatio');
+      if (premElem) premElem.className = 'kpi-value text-success';
       setText('kpiPriPremVol', `${formatVol(premKL)} KL`);
+      setText('kpiPremFYLabel', premFYBadgeText);
 
+      setText('kpiPriTargetStatus', `${formatVol(volFY26)} / ${formatVol(targetKL)} KL`);
       setText('kpiPriFY25Vol', formatVol(volFY25));
       setText('kpiPriFY26Vol', formatVol(volFY26));
       
@@ -2151,6 +2335,7 @@
       renderPrimaryTrendChart(selectedFY);
       renderPrimaryPackSizeChart(selectedFY);
       renderPrimaryProductSegmentChart();
+      renderServoGenuineIndustrialChart();
     }
 
     function renderPrimaryComparisonChart() {
@@ -2299,6 +2484,7 @@
       let totalKL = 0;
 
       chartData.forEach(d => {
+        if (d.CategoryColS === 'SPECIAL') return;
         const vol = d.volumeKL || 0;
         const day = d.InvDay || 15;
         totalKL += vol;
@@ -2311,9 +2497,17 @@
         }
       });
 
+      const incentive16_25 = v16_25 * 1000 * 0.5;
+      const incentive26_end = v26_end * 1000 * 1.5;
+
       const p1 = totalKL > 0 ? ((v1_15 / totalKL) * 100).toFixed(1) : "0.0";
       const p2 = totalKL > 0 ? ((v16_25 / totalKL) * 100).toFixed(1) : "0.0";
       const p3 = totalKL > 0 ? ((v26_end / totalKL) * 100).toFixed(1) : "0.0";
+
+      setHTML('incentiveLostSummary', `
+        <div><span class="text-muted">16-25th Lost:</span> <strong class="text-danger">₹${Math.round(incentive16_25).toLocaleString('en-IN')}</strong></div>
+        <div><span class="text-muted">26th-End Lost:</span> <strong class="text-danger">₹${Math.round(incentive26_end).toLocaleString('en-IN')}</strong></div>
+      `);
 
       primaryUpliftmentChartInstance = new Chart(ctx, {
         type: 'doughnut',
@@ -2337,11 +2531,87 @@
             tooltip: {
               callbacks: {
                 label: function(context) {
+                  const idx = context.dataIndex;
                   const val = context.raw || 0;
                   const pct = totalKL > 0 ? ((val / totalKL) * 100).toFixed(1) : "0.0";
-                  return ` ${context.label}: ${formatVol(val)} KL (${pct}%)`;
+                  let extraText = "";
+                  if (idx === 1) {
+                    extraText = ` | Incentive Lost: ₹${Math.round(incentive16_25).toLocaleString('en-IN')}`;
+                  } else if (idx === 2) {
+                    extraText = ` | Incentive Lost: ₹${Math.round(incentive26_end).toLocaleString('en-IN')}`;
+                  }
+                  return ` ${context.label}: ${formatVol(val)} KL (${pct}%)${extraText}`;
                 }
               }
+            }
+          }
+        }
+      });
+    }
+
+    function renderServoGenuineIndustrialChart() {
+      const ctx = document.getElementById('servoGenuineIndustrialChart');
+      if (!ctx) return;
+      if (servoGenuineIndustrialChartInstance) servoGenuineIndustrialChartInstance.destroy();
+
+      const types = ["Servo", "Genuine", "Industrial"];
+      const fy25Map = { "Servo": 0, "Genuine": 0, "Industrial": 0 };
+      const fy26Map = { "Servo": 0, "Genuine": 0, "Industrial": 0 };
+
+      filteredPrimaryData.forEach(d => {
+        const t = d.ServoType || "Servo";
+        const vol = d.volumeKL || 0;
+        if (d.FY === 'FY 25-26') {
+          fy25Map[t] = (fy25Map[t] || 0) + vol;
+        } else if (d.FY === 'FY 26-27') {
+          fy26Map[t] = (fy26Map[t] || 0) + vol;
+        }
+      });
+
+      const data25 = types.map(t => Math.round(fy25Map[t] || 0));
+      const data26 = types.map(t => Math.round(fy26Map[t] || 0));
+
+      servoGenuineIndustrialChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: types,
+          datasets: [
+            {
+              label: 'FY 25-26 (KL)',
+              data: data25,
+              backgroundColor: '#002b49',
+              borderRadius: 4
+            },
+            {
+              label: 'FY 26-27 (KL)',
+              data: data26,
+              backgroundColor: '#ff6600',
+              borderRadius: 4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false,
+          plugins: {
+            legend: { position: 'top' },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const isFY25 = context.datasetIndex === 0;
+                  const total = isFY25 ? types.reduce((sum, t) => sum + fy25Map[t], 0) : types.reduce((sum, t) => sum + fy26Map[t], 0);
+                  const val = context.raw || 0;
+                  const pct = total > 0 ? ((val / total) * 100).toFixed(1) : "0.0";
+                  return ` ${context.dataset.label}: ${formatVol(val)} KL (${pct}%)`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: { 
+              title: { display: true, text: 'Volume (KL)' },
+              ticks: { callback: v => Math.round(v) }
             }
           }
         }
@@ -2641,28 +2911,25 @@
        ========================================================= */
     function applySecondaryFilters() {
       const fy = document.getElementById('sFilterFY')?.value || 'ALL';
-      const chn = document.getElementById('sFilterChannel')?.value || 'ALL';
-      const prodSeg = document.getElementById('sFilterProdSegment')?.value || 'ALL';
-      const ssf = document.getElementById('sFilterSSF')?.value || 'ALL';
 
       filteredSecondaryData = secondaryDataStore.filter(item => {
         if (!selectedSecondaryStockists.has(item.Stockist)) return false;
         if (fy !== 'ALL' && item.FY !== fy) return false;
         if (!selectedSecondaryMonths.has(item.Month)) return false;
-        if (chn !== 'ALL' && item.CustomerGroup !== chn) return false;
-        if (prodSeg !== 'ALL' && item.ProductSegment !== prodSeg) return false;
-        if (ssf !== 'ALL' && item.SSF !== ssf) return false;
+        if (selectedSecondaryProdSegments.size > 0 && !selectedSecondaryProdSegments.has(item.ProductSegment)) return false;
+        if (selectedSecondaryChannels.size > 0 && !selectedSecondaryChannels.has(item.CustomerGroup)) return false;
+        if (selectedSecondarySSFs.size > 0 && !selectedSecondarySSFs.has(item.SSF)) return false;
         return true;
       });
 
       const badge = document.getElementById('secStockistBadge');
       if (badge) {
-        if (selectedSecondaryStockists.size === allSecondaryStockists.length) badge.innerText = (chn === 'ALL' ? 'All Channels' : chn);
+        if (selectedSecondaryStockists.size === allSecondaryStockists.length) badge.innerText = 'All Channels';
         else if (selectedSecondaryStockists.size === 1) badge.innerText = Array.from(selectedSecondaryStockists)[0];
         else badge.innerText = `${selectedSecondaryStockists.size} Stockists Selected`;
       }
 
-      updateSecondaryKPIs(chn, prodSeg, ssf);
+      updateSecondaryKPIs();
       renderSecondaryPivot();
       renderSecondaryCharts();
     }
@@ -2671,20 +2938,20 @@
       setSecondaryStockists(true);
       if (document.getElementById('sFilterFY')) document.getElementById('sFilterFY').value = 'ALL';
       setSecondaryMonths(true);
-      if (document.getElementById('sFilterChannel')) document.getElementById('sFilterChannel').value = 'ALL';
-      if (document.getElementById('sFilterProdSegment')) document.getElementById('sFilterProdSegment').value = 'ALL';
-      if (document.getElementById('sFilterSSF')) document.getElementById('sFilterSSF').value = 'ALL';
+      setSecondaryProdSegments(true);
+      setSecondaryChannels(true);
+      setSecondarySSFs(true);
       applySecondaryFilters();
       showToast("Secondary filters reset.");
     }
 
-    function updateSecondaryKPIs(chn, prodSeg, ssf) {
+    function updateSecondaryKPIs() {
       const baseForComparison = secondaryDataStore.filter(item => {
         if (!selectedSecondaryStockists.has(item.Stockist)) return false;
         if (!selectedSecondaryMonths.has(item.Month)) return false;
-        if (chn !== 'ALL' && item.CustomerGroup !== chn) return false;
-        if (prodSeg !== 'ALL' && item.ProductSegment !== prodSeg) return false;
-        if (ssf !== 'ALL' && item.SSF !== ssf) return false;
+        if (selectedSecondaryProdSegments.size > 0 && !selectedSecondaryProdSegments.has(item.ProductSegment)) return false;
+        if (selectedSecondaryChannels.size > 0 && !selectedSecondaryChannels.has(item.CustomerGroup)) return false;
+        if (selectedSecondarySSFs.size > 0 && !selectedSecondarySSFs.has(item.SSF)) return false;
         return true;
       });
 
@@ -2706,9 +2973,9 @@
       const bazaarRecordsFY25Full = secondaryDataStore.filter(d => {
         if (d.FY !== 'FY 25-26') return false;
         if (!selectedSecondaryStockists.has(d.Stockist)) return false;
-        if (chn !== 'ALL' && d.CustomerGroup !== chn) return false;
-        if (prodSeg !== 'ALL' && d.ProductSegment !== prodSeg) return false;
-        if (ssf !== 'ALL' && d.SSF !== ssf) return false;
+        if (selectedSecondaryProdSegments.size > 0 && !selectedSecondaryProdSegments.has(d.ProductSegment)) return false;
+        if (selectedSecondaryChannels.size > 0 && !selectedSecondaryChannels.has(d.CustomerGroup)) return false;
+        if (selectedSecondarySSFs.size > 0 && !selectedSecondarySSFs.has(d.SSF)) return false;
         return d.CustomerGroup === 'BAZAAR + SERVOXPERT';
       });
       const countFY25Full = new Set(bazaarRecordsFY25Full.map(d => d.CustomerName)).size;
@@ -3097,8 +3364,13 @@
 
           workbook.SheetNames.forEach(sheetName => {
             const worksheet = workbook.Sheets[sheetName];
+            const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
+            if (rawRows.length <= 1) return;
+            const headers = rawRows[0] || [];
+            // STRICT COLUMN U extraction via raw index 20
+            const colUName = headers.length >= 21 ? headers[20] : "Column U";
+
             const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-            
             json.forEach(row => {
               const fy = row['FY'] || row['Financial Year'] || (sheetName.includes('26-27') ? 'FY 26-27' : 'FY 25-26');
               const rawStk = row['Stockist Name'] || row['Name'] || row['Stockist'] || "Stockist";
@@ -3108,6 +3380,15 @@
               const colS = (row['Category'] || row['Categorisation'] || row['Premium'] || "MASS").toString().trim().toUpperCase();
               const isPrem = (colS === 'PREMIUM');
               const prodSegment = (row['Product segment 26-27'] || row['Product Segment'] || seg).toString().trim();
+              
+              const colUVal = (row[colUName] || row['Segment'] || row['Trade Category'] || "Servo").toString().trim();
+              let servoTypeNorm = "Servo";
+              const uUpper = colUVal.toUpperCase();
+              if (uUpper.includes('GENUINE') || uUpper.includes('OEM')) servoTypeNorm = "Genuine";
+              else if (uUpper.includes('INDUSTRIAL') || uUpper.includes('HYDRASHAKTI')) servoTypeNorm = "Industrial";
+              else if (uUpper.includes('SERVO')) servoTypeNorm = "Servo";
+              else servoTypeNorm = colUVal || "Servo";
+
               const qty = parseFloat(row['Invoiced Quantity'] || row['Billing qty in SKU'] || 1);
               const vol = parseFloat(row['KL'] || row['VOL IN KL'] || (qty * 0.05));
 
@@ -3119,6 +3400,7 @@
                 Stockist: rawStk.toString().trim(),
                 Segment: seg,
                 ProductSegment: prodSegment || "OTHER",
+                ServoType: servoTypeNorm,
                 ProductName: (row['Description'] || "SERVO Lube").toString().trim(),
                 CategoryColS: colS || "MASS",
                 Premium: isPrem ? 'PREMIUM' : 'MASS',
@@ -3132,8 +3414,7 @@
 
           if (parsedRecords.length > 0) {
             primaryDataStore = parsedRecords;
-            initializeMultiStockistControls();
-            populateFilterOptions();
+            initializeAllMultiSelects();
             applyPrimaryFilters();
             showToast(`Loaded ${parsedRecords.length} primary records from file.`);
           }
@@ -3185,8 +3466,8 @@
                 CustomerGroup: grpNorm,
                 ProductSegment: prodSegment || "OTHER",
                 SSF: (row['SSF Name'] || "Representative").toString().trim(),
-                Segment: (row['Trade Category'] || "Commercial Lube").toString().trim(),
-                ProductName: (row['Product Name'] || "SERVO Grade").toString().trim(),
+                Segment: (row['Trade Category'] || row['Product Group'] || "Commercial Lube").toString().trim(),
+                ProductName: (row['Product Name'] || row['SKU Name'] || "SERVO Grade").toString().trim(),
                 volumeKL: isNaN(volKL) ? 0 : volKL
               });
             });
@@ -3194,8 +3475,7 @@
 
           if (parsedRecords.length > 0) {
             secondaryDataStore = parsedRecords;
-            initializeMultiStockistControls();
-            populateFilterOptions();
+            initializeAllMultiSelects();
             applySecondaryFilters();
             showToast(`Loaded ${parsedRecords.length} secondary records from file.`);
           }

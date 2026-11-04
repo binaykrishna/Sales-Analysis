@@ -565,7 +565,7 @@
             </div>
             <div class="col-6 col-md-4 col-xl-2">
               <div class="kpi-card kpi-green">
-                <div class="kpi-title">Premium Share & Volume <span class="badge bg-secondary-subtle text-dark" style="font-size:0.55rem;">FY 26-27</span></div>
+                <div class="kpi-title">Premium Share & Volume <span class="badge bg-secondary-subtle text-dark" id="kpiPremFYLabel" style="font-size:0.55rem;">FY 26-27</span></div>
                 <div class="kpi-value text-success" id="kpiPriPremRatio">0.0%</div>
                 <small id="kpiPriPremVol" class="fw-bold text-muted">0 KL</small>
               </div>
@@ -1869,7 +1869,7 @@
               const rawMonth = row['Month'] || row['BILLING MONTH'];
               const rawDate = row['Inv.Date'] || row['Invoice Date'] || "";
               const invDay = extractDayFromDate(rawDate);
-              const seg = (row['SEGMENTATION'] || row['Segment'] || "DEO").toString().trim();
+              const seg = (row['SEGMENTATION'] || row['Segment'] || row['PRODUCT CATEGORY'] || "DEO").toString().trim();
               
               const colS = (row['Category'] || row['Categorisation'] || row['Premium'] || "MASS").toString().trim().toUpperCase();
               const isPrem = (colS === 'PREMIUM');
@@ -2077,11 +2077,21 @@
 
       const targetKL = getFilteredTargetKL(selectedPrimaryStockists, selectedPrimaryMonths);
 
-      // Strict calculation of Premium Share for FY 26-27 (Current FY) for selected stockists & months
-      const fy26FilteredForPrem = baseForComparison.filter(d => d.FY === 'FY 26-27');
-      const premKL26 = fy26FilteredForPrem.filter(d => d.Premium === 'PREMIUM').reduce((acc, c) => acc + (c.volumeKL || 0), 0);
-      const totalKL26 = fy26FilteredForPrem.reduce((acc, c) => acc + (c.volumeKL || 0), 0);
-      const premRatio26 = totalKL26 > 0 ? ((premKL26 / totalKL26) * 100) : 0;
+      // Evaluate Premium Ratio dynamically based on the Selected FY
+      let premTargetRecords = [];
+      let premFYBadgeText = "FY 26-27";
+      if (selectedFY === 'FY 25-26') {
+        premTargetRecords = baseForComparison.filter(d => d.FY === 'FY 25-26');
+        premFYBadgeText = "FY 25-26";
+      } else {
+        // Includes 'ALL' or 'FY 26-27'
+        premTargetRecords = baseForComparison.filter(d => d.FY === 'FY 26-27');
+        premFYBadgeText = "FY 26-27";
+      }
+
+      const premKL = premTargetRecords.filter(d => d.Premium === 'PREMIUM').reduce((acc, c) => acc + (c.volumeKL || 0), 0);
+      const totalPremBaseKL = premTargetRecords.reduce((acc, c) => acc + (c.volumeKL || 0), 0);
+      const premRatio = totalPremBaseKL > 0 ? ((premKL / totalPremBaseKL) * 100) : 0;
 
       const prodSegData = getBreakdownData(selectedFY);
       const prodSegMap = {};
@@ -2104,11 +2114,14 @@
       const majorProdSegPct = totalProdSegKL > 0 ? ((maxProdSegKL / totalProdSegKL) * 100) : 0;
 
       setText('kpiPriTargetVol', formatVol(targetKL));
-      setText('kpiPriTargetAch', formatPct(premRatio26));
-      const achElem = document.getElementById('kpiPriTargetAch');
-      if (achElem) achElem.className = 'kpi-value text-success';
+      
+      // Update Premium Ratio Elements
+      setText('kpiPriPremRatio', formatPct(premRatio));
+      const premRatioElem = document.getElementById('kpiPriPremRatio');
+      if (premRatioElem) premRatioElem.className = 'kpi-value text-success';
+      setText('kpiPremFYLabel', premFYBadgeText);
+      setText('kpiPriPremVol', `${formatVol(premKL)} KL`);
 
-      setText('kpiPriTargetStatus', `${formatVol(volFY26)} / ${formatVol(targetKL)} KL`);
       setText('kpiPriFY25Vol', formatVol(volFY25));
       setText('kpiPriFY26Vol', formatVol(volFY26));
       
@@ -2120,7 +2133,6 @@
       const pctElem = document.getElementById('kpiPriYoYPct');
       if (pctElem) pctElem.className = 'fw-bold ' + (diffPct >= 0 ? 'text-success' : 'text-danger');
 
-      setText('kpiPriPremVol', `${formatVol(premKL26)} KL`);
       setText('kpiPriMajorProdSeg', majorProdSeg);
       setText('kpiPriMajorProdSegVol', `${formatVol(maxProdSegKL)} KL (${formatPct(majorProdSegPct)})`);
     }

@@ -467,7 +467,6 @@
             </div>
           </div>
           <div class="row g-2">
-            <!-- Multi-Stockist Filter -->
             <div class="col-12 col-sm-6 col-md-4 col-xl-3">
               <label class="form-label-xs text-primary"><i class="fa-solid fa-users-viewfinder me-1"></i> Stockists (Multi-Select)</label>
               <div class="dropdown">
@@ -488,7 +487,6 @@
               </div>
             </div>
 
-            <!-- Financial Year -->
             <div class="col-12 col-sm-6 col-md-2 col-xl-2">
               <label class="form-label-xs">Financial Year (FY)</label>
               <select id="pFilterFY" class="form-select form-select-sm" onchange="applyPrimaryFilters()">
@@ -498,7 +496,6 @@
               </select>
             </div>
 
-            <!-- MULTI-MONTH SELECTION DROPDOWN -->
             <div class="col-12 col-sm-6 col-md-3 col-xl-2">
               <label class="form-label-xs"><i class="fa-solid fa-calendar-days text-primary me-1"></i> Billing Months (Multi)</label>
               <div class="dropdown">
@@ -519,7 +516,6 @@
               </div>
             </div>
 
-            <!-- PRODUCT SEGMENT FILTER -->
             <div class="col-12 col-sm-6 col-md-3 col-xl-2">
               <label class="form-label-xs text-dark"><i class="fa-solid fa-layer-group text-primary me-1"></i> Product Segment</label>
               <select id="pFilterProdSegment" class="form-select form-select-sm" onchange="applyPrimaryFilters()">
@@ -527,7 +523,6 @@
               </select>
             </div>
 
-            <!-- Segmentation / General -->
             <div class="col-12 col-sm-6 col-md-3 col-xl-1">
               <label class="form-label-xs">Segment</label>
               <select id="pFilterSegment" class="form-select form-select-sm" onchange="applyPrimaryFilters()">
@@ -535,7 +530,6 @@
               </select>
             </div>
 
-            <!-- Category (Column S) -->
             <div class="col-12 col-sm-6 col-md-3 col-xl-1">
               <label class="form-label-xs">Category</label>
               <select id="pFilterPremium" class="form-select form-select-sm" onchange="applyPrimaryFilters()">
@@ -543,7 +537,6 @@
               </select>
             </div>
 
-            <!-- Pack Size -->
             <div class="col-12 col-sm-6 col-md-3 col-xl-1">
               <label class="form-label-xs">Pack Size</label>
               <select id="pFilterPackSize" class="form-select form-select-sm" onchange="applyPrimaryFilters()">
@@ -555,7 +548,7 @@
 
         <!-- 2. CAPTURE AREA (STARTING FROM BELOW THE FILTER BAR) -->
         <div id="primaryExportCaptureArea" class="capture-container">
-          <!-- Primary KPI Strip: Premium % and Volume in place of Target Achievement -->
+          <!-- Primary KPI Strip: Premium % & Volume replaces Target Achievement -->
           <div class="row g-2 mb-3">
             <div class="col-6 col-md-4 col-xl-2">
               <div class="kpi-card kpi-orange">
@@ -565,9 +558,9 @@
             </div>
             <div class="col-6 col-md-4 col-xl-2">
               <div class="kpi-card kpi-green">
-                <div class="kpi-title">Premium Volume & %</div>
-                <div class="kpi-value" id="kpiPriPremVol">0 KL</div>
-                <small id="kpiPriPremShare" class="fw-bold text-success">0.0% of Total</small>
+                <div class="kpi-title">Premium Share & Volume</div>
+                <div class="kpi-value text-success" id="kpiPriPremRatio">0.0%</div>
+                <small id="kpiPriPremVol" class="fw-bold text-muted">0 KL</small>
               </div>
             </div>
             <div class="col-6 col-md-4 col-xl-2">
@@ -1174,7 +1167,7 @@
         if (d >= 1 && d <= 31) return d;
       }
       const s = dateVal.toString().trim();
-      if (s.startsWith("Date(") && s.endsWith(")")) {
+      if (s.startswith && s.startsWith("Date(") && s.endsWith(")")) {
         try {
           const parts = s.slice(5, -1).split(',');
           if (parts.length >= 3) {
@@ -1251,7 +1244,7 @@
             ProductSegment: prodSegs[mIdx % prodSegs.length],
             ProductName: `SERVO ${segs[mIdx % segs.length]} Industrial`,
             CategoryColS: cats[mIdx % cats.length],
-            Premium: cats[mIdx % cats.length],
+            Premium: cats[mIdx % cats.length] === 'PREMIUM' ? 'PREMIUM' : 'MASS',
             PackSize: "210 L",
             quantity: Math.round(v25 * 5),
             volumeKL: v25
@@ -1268,7 +1261,7 @@
               ProductSegment: prodSegs[mIdx % prodSegs.length],
               ProductName: `SERVO ${segs[mIdx % segs.length]} Commercial`,
               CategoryColS: cats[mIdx % cats.length],
-              Premium: cats[mIdx % cats.length],
+              Premium: cats[mIdx % cats.length] === 'PREMIUM' ? 'PREMIUM' : 'MASS',
               PackSize: "210 L",
               quantity: Math.round(v26 * 5),
               volumeKL: v26
@@ -1886,7 +1879,7 @@
                 ProductSegment: prodSegment || "OTHER",
                 ProductName: (row['Description'] || row['Material'] || "SERVO Lube").toString().trim(),
                 CategoryColS: colS || "MASS",
-                Premium: colS.includes('PREM') ? 'PREMIUM' : (colS.includes('ASPIR') ? 'ASPIRATIONAL' : 'MASS'),
+                Premium: colS.includes('PREM') ? 'PREMIUM' : 'MASS',
                 PackSize: psize,
                 Assorted: (row['4T/ Assorted'] || (seg.includes('4T') ? '4T' : 'ASSORTED')).toString().trim(),
                 quantity: isNaN(qty) ? 1 : qty,
@@ -2073,12 +2066,11 @@
       const diffPct = volFY25 > 0 ? ((diffKL / volFY25) * 100) : 0;
 
       const targetKL = getFilteredTargetKL(selectedPrimaryStockists, selectedPrimaryMonths);
-
+      
       const premKL = filteredPrimaryData.filter(d => d.CategoryColS === 'PREMIUM').reduce((acc, c) => acc + (c.volumeKL || 0), 0);
       const totalKL = filteredPrimaryData.reduce((acc, c) => acc + (c.volumeKL || 0), 0);
       const premRatio = totalKL > 0 ? ((premKL / totalKL) * 100) : 0;
 
-      // Major Segment from Product segment 26-27 (Column T)
       const prodSegData = getBreakdownData(selectedFY);
       const prodSegMap = {};
       let totalProdSegKL = 0;
@@ -2100,11 +2092,10 @@
       const majorProdSegPct = totalProdSegKL > 0 ? ((maxProdSegKL / totalProdSegKL) * 100) : 0;
 
       setText('kpiPriTargetVol', formatVol(targetKL));
-      
-      // Premium % and Volume KPI in place of Target Achievement
-      setText('kpiPriPremShare', `${formatPct(premRatio)} of Total`);
+      setText('kpiPriTargetAch', formatPct(premRatio));
       setText('kpiPriPremVol', `${formatVol(premKL)} KL`);
 
+      setText('kpiPriTargetStatus', `${formatVol(volFY26)} / ${formatVol(targetKL)} KL`);
       setText('kpiPriFY25Vol', formatVol(volFY25));
       setText('kpiPriFY26Vol', formatVol(volFY26));
       
@@ -3103,7 +3094,7 @@
                 ProductSegment: prodSegment || "OTHER",
                 ProductName: (row['Description'] || "SERVO Lube").toString().trim(),
                 CategoryColS: colS || "MASS",
-                Premium: colS.includes('PREM') ? 'PREMIUM' : (colS.includes('ASPIR') ? 'ASPIRATIONAL' : 'MASS'),
+                Premium: colS.includes('PREM') ? 'PREMIUM' : 'MASS',
                 PackSize: (row['PackSize'] || "210 L").toString().trim(),
                 Assorted: (row['4T/ Assorted'] || (seg.includes('4T') ? '4T' : 'ASSORTED')).toString().trim(),
                 quantity: isNaN(qty) ? 1 : qty,

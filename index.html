@@ -555,7 +555,7 @@
 
         <!-- 2. CAPTURE AREA (STARTING FROM BELOW THE FILTER BAR) -->
         <div id="primaryExportCaptureArea" class="capture-container">
-          <!-- Primary KPI Strip -->
+          <!-- Primary KPI Strip: Target Achievement replaced with Premium % -->
           <div class="row g-2 mb-3">
             <div class="col-6 col-md-4 col-xl-2">
               <div class="kpi-card kpi-orange">
@@ -565,9 +565,9 @@
             </div>
             <div class="col-6 col-md-4 col-xl-2">
               <div class="kpi-card kpi-green">
-                <div class="kpi-title">Target Achievement</div>
-                <div class="kpi-value" id="kpiPriTargetAch">0.0%</div>
-                <small id="kpiPriTargetStatus" class="fw-bold text-muted">0 / 0 KL</small>
+                <div class="kpi-title">Premium %</div>
+                <div class="kpi-value" id="kpiPriPremiumPct">0.0%</div>
+                <small id="kpiPriPremStatus" class="fw-bold text-muted">0 / 0 KL</small>
               </div>
             </div>
             <div class="col-6 col-md-4 col-xl-2">
@@ -1167,7 +1167,6 @@
       return MONTH_ORDER.includes(str) ? str : "APR";
     }
 
-    // Advanced date parser supporting native Date, GViz Date(Y, M, D), strings, and numbers
     function extractDayFromDate(dateVal) {
       if (!dateVal && dateVal !== 0) return 15;
       if (typeof dateVal === 'number') {
@@ -1175,7 +1174,7 @@
         if (d >= 1 && d <= 31) return d;
       }
       const s = dateVal.toString().trim();
-      if (s.startsWith("Date(") && s.endsWith(")")) {
+      if (s.startsWith("Date(") && s.endswith(")")) {
         try {
           const parts = s.slice(5, -1).split(',');
           if (parts.length >= 3) {
@@ -1184,7 +1183,6 @@
           }
         } catch(e) {}
       }
-      // Try parsing with Date object or regex
       const dt = new Date(s);
       if (!isNaN(dt.getTime())) {
         const d = dt.getDate();
@@ -1871,7 +1869,7 @@
               const rawMonth = row['Month'] || row['BILLING MONTH'];
               const rawDate = row['Inv.Date'] || row['Invoice Date'] || "";
               const invDay = extractDayFromDate(rawDate);
-              const seg = (row['SEGMENTATION'] || row['Segment'] || row['PRODUCT CATEGORY'] || "DEO").toString().trim();
+              const seg = (row['SEGMENTATION'] || row['Segment'] || "DEO").toString().trim();
               const colS = (row['Category'] || row['Categorisation'] || row['Premium'] || "MASS").toString().trim().toUpperCase();
               const prodSegment = (row['Product segment 26-27'] || row['Product Segment'] || seg).toString().trim();
               const psize = (row['PackSize'] || row['PACK SIZE'] || "210 L").toString().trim();
@@ -1886,7 +1884,7 @@
                 Stockist: rawStk.toString().trim(),
                 Segment: seg,
                 ProductSegment: prodSegment || "OTHER",
-                ProductName: (row['Description'] || row['Material'] || "SERVO Lube").toString().trim(),
+                ProductName: (row['Description'] || "SERVO Lube").toString().trim(),
                 CategoryColS: colS || "MASS",
                 Premium: colS.includes('PREM') ? 'PREMIUM' : (colS.includes('ASPIR') ? 'ASPIRATIONAL' : 'MASS'),
                 PackSize: psize,
@@ -2075,11 +2073,11 @@
       const diffPct = volFY25 > 0 ? ((diffKL / volFY25) * 100) : 0;
 
       const targetKL = getFilteredTargetKL(selectedPrimaryStockists, selectedPrimaryMonths);
-      const achPct = targetKL > 0 ? ((volFY26 / targetKL) * 100) : 0;
 
+      // PREMIUM % KPI calculation
       const premKL = filteredPrimaryData.filter(d => d.CategoryColS === 'PREMIUM').reduce((acc, c) => acc + (c.volumeKL || 0), 0);
       const totalKL = filteredPrimaryData.reduce((acc, c) => acc + (c.volumeKL || 0), 0);
-      const premRatio = totalKL > 0 ? ((premKL / totalKL) * 100) : 0;
+      const premPct = totalKL > 0 ? ((premKL / totalKL) * 100) : 0;
 
       const prodSegData = getBreakdownData(selectedFY);
       const prodSegMap = {};
@@ -2102,11 +2100,11 @@
       const majorProdSegPct = totalProdSegKL > 0 ? ((maxProdSegKL / totalProdSegKL) * 100) : 0;
 
       setText('kpiPriTargetVol', formatVol(targetKL));
-      setText('kpiPriTargetAch', formatPct(achPct));
+      setText('kpiPriTargetAch', formatPct(premPct));
       const achElem = document.getElementById('kpiPriTargetAch');
-      if (achElem) achElem.className = 'kpi-value ' + (achPct >= 100 ? 'text-success' : (achPct >= 80 ? 'text-warning' : 'text-danger'));
+      if (achElem) achElem.className = 'kpi-value ' + (premPct >= 30 ? 'text-success' : 'text-primary');
 
-      setText('kpiPriTargetStatus', `${formatVol(volFY26)} / ${formatVol(targetKL)} KL`);
+      setText('kpiPriTargetStatus', `${formatVol(premKL)} / ${formatVol(totalKL)} KL`);
       setText('kpiPriFY25Vol', formatVol(volFY25));
       setText('kpiPriFY26Vol', formatVol(volFY26));
       
